@@ -599,21 +599,6 @@ export const MatchCard = ({
                     p: '16px',
                     '&:last-child': { pb: '16px' }
                 }}>
-                    {/* Match Number (if completed) */}
-                    {match.matchNumber > 0 && (
-                        <Typography 
-                            variant="body2" 
-                            sx={{ 
-                                mb: 2,
-                                fontWeight: 600,
-                                color: '#1A1A1A',
-                                fontSize: '0.875rem',
-                                lineHeight: 1.2
-                            }}
-                        >
-                            Match #{match.matchNumber}
-                        </Typography>
-                    )}
                     {/* Match Result (if completed) */}
                     {isCompleted && match.result?.winner && (
                             <Typography 

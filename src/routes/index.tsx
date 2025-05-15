@@ -5,7 +5,6 @@ import ScheduleView from './ScheduleView';
 import PointsTableView from './PointsTableView';
 import KnockoutView from './KnockoutView';
 import AboutView from './AboutView';
-import MatchSummaryView from './MatchSummaryView';
 
 export default function AppRouter() {
     return (
@@ -16,7 +15,6 @@ export default function AppRouter() {
                 <Route path="points-table" element={<PointsTableView />} />
                 <Route path="knockout" element={<KnockoutView />} />
                 <Route path="about" element={<AboutView />} />
-                <Route path="match/:matchId" element={<MatchSummaryView />} />
             </Route>
         </Routes>
     );

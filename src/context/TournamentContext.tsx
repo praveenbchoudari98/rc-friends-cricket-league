@@ -121,8 +121,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
             status: 'scheduled',
             date: new Date(),
             time: format(new Date(), 'HH:mm'),
-            venue: 'Wankhede Stadium, Mumbai',
-            matchNumber: 0
+            venue: 'Wankhede Stadium, Mumbai'
         };
 
         setTournament(prev => {
@@ -203,8 +202,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
                     venue: updatedMatch.venue,
                     parentMatchId: updatedMatch.parentMatchId || updatedMatch.id,
                     isSuperDuperOver: true,
-                    date: new Date(),
-                    matchNumber: 0
+                    date: new Date()
                 };
                 updatedMatches.push(superDuperOverMatch);
             }
@@ -242,8 +240,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
                                 status: 'scheduled',
                                 venue: 'Final Venue',
                                 date: new Date(),
-                                time: format(new Date(), 'HH:mm'),
-                                matchNumber: 0
+                                time: format(new Date(), 'HH:mm')
                             };
                             updatedMatches.push(finalMatch);
                             newStage = 'final';

@@ -19,7 +19,6 @@ interface MatchSummaryPageProps {
 
 export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProps) => {
     const navigate = useNavigate();
-    
     if (!match.result || !match.inningsInfo) return null;
 
     const { team1, team2 } = match;
@@ -53,109 +52,126 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                 bgcolor: '#001838',
                 color: 'white',
                 py: 2,
-                position: 'sticky',
-                top: 0,
-                zIndex: 1000
+                px: 3,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2
             }}>
-                <Container maxWidth="sm">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <IconButton 
-                            color="inherit" 
-                            onClick={() => navigate(-1)}
-                            sx={{ p: 1 }}
-                        >
-                            <ArrowBackIcon />
-                        </IconButton>
-                        <Typography variant="h6">
-                            Match Summary
-                        </Typography>
-                    </Box>
-                </Container>
+                <IconButton 
+                    onClick={() => navigate(-1)}
+                    sx={{ color: 'white' }}
+                >
+                    <ArrowBackIcon />
+                </IconButton>
+                <Typography variant="h6">
+                    Match Summary
+                </Typography>
             </Box>
 
             {/* Content */}
-            <Container 
-                maxWidth="sm" 
-                sx={{ 
-                    mt: 3,
-                    mb: 4,
-                    bgcolor: 'background.paper',
+            <Container maxWidth="sm" sx={{ py: 4 }}>
+                <Paper sx={{ 
                     borderRadius: 2,
-                    boxShadow: 1,
-                    overflow: 'hidden'
-                }}
-            >
-                <Box sx={{ p: 3 }}>
-                    <Box sx={{ mb: 3 }}>
-                        <Typography variant="h6" gutterBottom>
-                            {team1.name} vs {team2.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                            {format(new Date(date), 'PPP')} at {time}
-                        </Typography>
-                        <Typography variant="body1" color="primary" sx={{ fontWeight: 600, mt: 1 }}>
-                            {match.result.winner ? `${match.result.winner.name} ${getVictoryMargin()}` : getVictoryMargin()}
-                        </Typography>
-                    </Box>
-
-                    <Divider sx={{ my: 2 }} />
-
-                    <Box sx={{ mb: 3 }}>
-                        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                            Match Details
-                        </Typography>
-                        <Typography variant="body2" gutterBottom>
-                            Toss: {tossWinner.name} won the toss and chose to {tossDecision} first
-                        </Typography>
-                        <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
-                            <Paper sx={{ flex: 1, p: 2 }}>
-                                <Typography variant="subtitle2" gutterBottom>
-                                    {team1.name}
-                                </Typography>
-                                <Typography variant="h6">
-                                    {team1Score.runs}/{team1Score.wickets}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {team1Score.overs} overs
-                                </Typography>
-                            </Paper>
-                            <Paper sx={{ flex: 1, p: 2 }}>
-                                <Typography variant="subtitle2" gutterBottom>
-                                    {team2.name}
-                                </Typography>
-                                <Typography variant="h6">
-                                    {team2Score.runs}/{team2Score.wickets}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {team2Score.overs} overs
-                                </Typography>
-                            </Paper>
+                    overflow: 'hidden',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}>
+                    <Box sx={{ p: 3 }}>
+                        <Box sx={{ mb: 3 }}>
+                            <Typography variant="h6" gutterBottom>
+                                {team1.name} vs {team2.name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" gutterBottom>
+                                {format(new Date(date), 'PPP')} at {time}
+                            </Typography>
+                            <Typography variant="body1" color="primary" sx={{ fontWeight: 600, mt: 1 }}>
+                                {match.result.winner ? `${match.result.winner.name} ${getVictoryMargin()}` : getVictoryMargin()}
+                            </Typography>
                         </Box>
-                    </Box>
 
-                    <Box sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'flex-end',
-                        gap: 2,
-                        mt: 4
-                    }}>
-                        {onUpdateScores && (
+                        <Divider sx={{ my: 2 }} />
+
+                        <Box sx={{ mb: 3 }}>
+                            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                                Match Details
+                            </Typography>
+                            <Typography variant="body2" gutterBottom>
+                                Toss: {tossWinner.name} won the toss and chose to {tossDecision} first
+                            </Typography>
+                            <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+                                <Paper sx={{ 
+                                    flex: 1, 
+                                    p: 2,
+                                    bgcolor: '#f8f9fa',
+                                    border: '1px solid #e0e0e0'
+                                }}>
+                                    <Typography variant="subtitle2" gutterBottom>
+                                        {team1.name}
+                                    </Typography>
+                                    <Typography variant="h6">
+                                        {team1Score.runs}/{team1Score.wickets}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {team1Score.overs} overs
+                                    </Typography>
+                                </Paper>
+                                <Paper sx={{ 
+                                    flex: 1, 
+                                    p: 2,
+                                    bgcolor: '#f8f9fa',
+                                    border: '1px solid #e0e0e0'
+                                }}>
+                                    <Typography variant="subtitle2" gutterBottom>
+                                        {team2.name}
+                                    </Typography>
+                                    <Typography variant="h6">
+                                        {team2Score.runs}/{team2Score.wickets}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {team2Score.overs} overs
+                                    </Typography>
+                                </Paper>
+                            </Box>
+                        </Box>
+
+                        {/* Actions */}
+                        <Box sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'flex-end',
+                            gap: 2,
+                            mt: 3
+                        }}>
+                            {onUpdateScores && (
+                                <Button 
+                                    onClick={onUpdateScores}
+                                    variant="contained"
+                                    sx={{
+                                        bgcolor: '#FF6B00',
+                                        color: 'white',
+                                        '&:hover': {
+                                            bgcolor: '#cc5500'
+                                        }
+                                    }}
+                                >
+                                    Update Scores
+                                </Button>
+                            )}
                             <Button 
-                                onClick={onUpdateScores}
-                                variant="contained"
+                                onClick={() => navigate(-1)}
+                                variant="outlined"
                                 sx={{
-                                    bgcolor: '#FF6B00',
-                                    color: 'white',
+                                    borderColor: '#FF8C00',
+                                    color: '#001838',
                                     '&:hover': {
-                                        bgcolor: '#cc5500'
+                                        borderColor: '#FF8C00',
+                                        bgcolor: 'rgba(0,24,56,0.04)'
                                     }
                                 }}
                             >
-                                Update Scores
+                                Back
                             </Button>
-                        )}
+                        </Box>
                     </Box>
-                </Box>
+                </Paper>
             </Container>
         </Box>
     );

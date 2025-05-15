@@ -40,6 +40,7 @@ export interface InningsInfo {
 
 export interface Match {
     id: string;
+    matchNumber?: number;
     team1: Team;
     team2: Team;
     date?: Date;
@@ -51,7 +52,6 @@ export interface Match {
     parentMatchId?: string;
     isSuperDuperOver?: boolean;
     inningsInfo?: InningsInfo;
-    matchNumber: number;
 }
 
 export interface TeamStats {
