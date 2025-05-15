@@ -2,8 +2,6 @@ import {
     Button,
     Typography,
     Box,
-    Divider,
-    Paper,
     Container,
     IconButton
 } from '@mui/material';
@@ -23,7 +21,7 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
 
     const { team1, team2 } = match;
     const { team1Score, team2Score } = match.result;
-    const { tossWinner, tossDecision, battingFirst, date, time } = match.inningsInfo;
+    const { date, time } = match.inningsInfo;
 
     const getVictoryMargin = () => {
         if (!match.result) {
@@ -34,144 +32,162 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
             return 'Match Tied';
         }
         
-        const battingFirstTeam = battingFirst;
-        const battingFirstScore = battingFirstTeam.id === team1.id ? team1Score : team2Score;
-        const battingSecondScore = battingFirstTeam.id === team1.id ? team2Score : team1Score;
-        
-        if (match.result.winner.id === battingFirstTeam.id) {
-            return `won by ${battingFirstScore.runs - battingSecondScore.runs} runs`;
+        if (match.result.winner.id === team1.id) {
+            return match.result.team1Score.runs > match.result.team2Score.runs
+                ? `${match.result.team1Score.runs - match.result.team2Score.runs} runs`
+                : `${10 - match.result.team1Score.wickets} wickets`;
         } else {
-            return `won by ${10 - battingSecondScore.wickets} wickets`;
+            return match.result.team2Score.runs > match.result.team1Score.runs
+                ? `${match.result.team2Score.runs - match.result.team1Score.runs} runs`
+                : `${10 - match.result.team2Score.wickets} wickets`;
         }
     };
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5' }}>
-            {/* Header */}
+        <Box sx={{ minHeight: '100vh', bgcolor: '#1a2d7d' }}>
+            {/* Navigation Bar */}
             <Box sx={{ 
-                bgcolor: '#001838',
-                color: 'white',
-                py: 2,
-                px: 3,
+                bgcolor: '#1a2d7d',
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                py: 1.5,
+                px: 2,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 2
             }}>
-                <IconButton 
-                    onClick={() => navigate(-1)}
-                    sx={{ color: 'white' }}
-                >
-                    <ArrowBackIcon />
-                </IconButton>
-                <Typography variant="h6">
-                    Match Summary
+                <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 2,
+                    flex: 1
+                }}>
+                    <IconButton 
+                        onClick={() => navigate(-1)}
+                        sx={{ color: 'white' }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Typography variant="body1" sx={{ color: 'white', fontWeight: 500 }}>
+                        MATCHES
+                    </Typography>
+                </Box>
+                <Typography variant="body2" sx={{ color: 'white', fontWeight: 500 }}>
+                    MATCH {match.matchNumber || '57'}
                 </Typography>
             </Box>
 
-            {/* Content */}
-            <Container maxWidth="sm" sx={{ py: 4 }}>
-                <Paper sx={{ 
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            {/* Teams and Scores Section */}
+            <Container maxWidth="lg" sx={{ pt: 4, pb: 3 }}>
+                <Box sx={{ 
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 4
                 }}>
-                    <Box sx={{ p: 3 }}>
-                        <Box sx={{ mb: 3 }}>
-                            <Typography variant="h6" gutterBottom>
-                                {team1.name} vs {team2.name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" gutterBottom>
-                                {format(new Date(date), 'PPP')} at {time}
-                            </Typography>
-                            <Typography variant="body1" color="primary" sx={{ fontWeight: 600, mt: 1 }}>
-                                {match.result.winner ? `${match.result.winner.name} ${getVictoryMargin()}` : getVictoryMargin()}
-                            </Typography>
-                        </Box>
-
-                        <Divider sx={{ my: 2 }} />
-
-                        <Box sx={{ mb: 3 }}>
-                            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                                Match Details
-                            </Typography>
-                            <Typography variant="body2" gutterBottom>
-                                Toss: {tossWinner.name} won the toss and chose to {tossDecision} first
-                            </Typography>
-                            <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
-                                <Paper sx={{ 
-                                    flex: 1, 
-                                    p: 2,
-                                    bgcolor: '#f8f9fa',
-                                    border: '1px solid #e0e0e0'
-                                }}>
-                                    <Typography variant="subtitle2" gutterBottom>
-                                        {team1.name}
-                                    </Typography>
-                                    <Typography variant="h6">
-                                        {team1Score.runs}/{team1Score.wickets}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        {team1Score.overs} overs
-                                    </Typography>
-                                </Paper>
-                                <Paper sx={{ 
-                                    flex: 1, 
-                                    p: 2,
-                                    bgcolor: '#f8f9fa',
-                                    border: '1px solid #e0e0e0'
-                                }}>
-                                    <Typography variant="subtitle2" gutterBottom>
-                                        {team2.name}
-                                    </Typography>
-                                    <Typography variant="h6">
-                                        {team2Score.runs}/{team2Score.wickets}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        {team2Score.overs} overs
-                                    </Typography>
-                                </Paper>
-                            </Box>
-                        </Box>
-
-                        {/* Actions */}
-                        <Box sx={{ 
-                            display: 'flex', 
-                            justifyContent: 'flex-end',
-                            gap: 2,
-                            mt: 3
+                    {/* Team 1 */}
+                    <Box sx={{ 
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 2
+                    }}>
+                        <Box
+                            component="img"
+                            src={team1.logo}
+                            alt={team1.name}
+                            sx={{
+                                width: 100,
+                                height: 100,
+                                objectFit: 'contain',
+                                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))'
+                            }}
+                        />
+                        <Typography variant="h3" sx={{ 
+                            color: 'white',
+                            fontSize: '2.5rem',
+                            fontWeight: 700
                         }}>
-                            {onUpdateScores && (
-                                <Button 
-                                    onClick={onUpdateScores}
-                                    variant="contained"
-                                    sx={{
-                                        bgcolor: '#FF6B00',
-                                        color: 'white',
-                                        '&:hover': {
-                                            bgcolor: '#cc5500'
-                                        }
-                                    }}
-                                >
-                                    Update Scores
-                                </Button>
-                            )}
-                            <Button 
-                                onClick={() => navigate(-1)}
-                                variant="outlined"
-                                sx={{
-                                    borderColor: '#FF8C00',
-                                    color: '#001838',
-                                    '&:hover': {
-                                        borderColor: '#FF8C00',
-                                        bgcolor: 'rgba(0,24,56,0.04)'
-                                    }
-                                }}
-                            >
-                                Back
-                            </Button>
-                        </Box>
+                            {team1Score.runs}/{team1Score.wickets}
+                        </Typography>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                            {team1Score.overs} Overs
+                        </Typography>
                     </Box>
-                </Paper>
+
+                    {/* Match Info */}
+                    <Box sx={{ 
+                        textAlign: 'center',
+                        color: 'rgba(255,255,255,0.7)'
+                    }}>
+                        <Box sx={{ 
+                            bgcolor: 'white',
+                            color: '#1a2d7d',
+                            px: 2,
+                            py: 0.5,
+                            borderRadius: 1,
+                            mb: 2,
+                            display: 'inline-block'
+                        }}>
+                            MATCH {match.matchNumber || '57'}
+                        </Box>
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                            Eden Gardens, Kolkata
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                            {format(new Date(date), 'dd MMM yyyy')}
+                        </Typography>
+                        <Typography variant="body2">
+                            {format(new Date(`2000-01-01 ${time}`), 'h:mm a')} IST
+                        </Typography>
+                    </Box>
+
+                    {/* Team 2 */}
+                    <Box sx={{ 
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 2
+                    }}>
+                        <Box
+                            component="img"
+                            src={team2.logo}
+                            alt={team2.name}
+                            sx={{
+                                width: 100,
+                                height: 100,
+                                objectFit: 'contain',
+                                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))'
+                            }}
+                        />
+                        <Typography variant="h3" sx={{ 
+                            color: 'white',
+                            fontSize: '2.5rem',
+                            fontWeight: 700
+                        }}>
+                            {team2Score.runs}/{team2Score.wickets}
+                        </Typography>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                            {team2Score.overs} Overs
+                        </Typography>
+                    </Box>
+                </Box>
+
+                {/* Result Banner */}
+                <Box sx={{ 
+                    bgcolor: '#1e367c',
+                    py: 2,
+                    textAlign: 'center'
+                }}>
+                    <Typography variant="h6" sx={{ 
+                        color: 'white',
+                        fontWeight: 500
+                    }}>
+                        {match.result.result === 'tie' 
+                            ? 'Match Tied'
+                            : `${match.result.winner?.name} Won by ${getVictoryMargin()}`
+                        }
+                    </Typography>
+                </Box>
             </Container>
         </Box>
     );

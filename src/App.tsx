@@ -7,6 +7,7 @@ import ScheduleView from './routes/ScheduleView';
 import PointsTableView from './routes/PointsTableView';
 import KnockoutView from './routes/KnockoutView';
 import AboutView from './routes/AboutView';
+import MatchSummaryView from './routes/MatchSummaryView';
 
 // Theme configuration
 const theme = createTheme({
@@ -156,6 +157,7 @@ function App() {
                         <Route path="points-table" element={<PointsTableView />} />
                         <Route path="knockout" element={<KnockoutView />} />
                         <Route path="about" element={<AboutView />} />
+                        <Route path="match/:matchId" element={<MatchSummaryView />} />
                     </Routes>
                 </Container>
 

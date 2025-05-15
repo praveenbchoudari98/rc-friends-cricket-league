@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -28,6 +28,7 @@ interface ScheduleProps {
     canStartTournament: boolean;
     currentStage: TournamentStage;
     onCreatePlayoffMatch: (team1: Team, team2: Team, matchType: MatchType) => void;
+    updateMatchId?: string | null;
 }
 
 export const Schedule = ({
@@ -37,10 +38,22 @@ export const Schedule = ({
     onStartTournament,
     canStartTournament,
     currentStage,
-    onCreatePlayoffMatch
+    onCreatePlayoffMatch,
+    updateMatchId
 }: ScheduleProps) => {
     const [startModalOpen, setStartModalOpen] = useState(false);
-    const [currentTab, setCurrentTab] = useState(0);
+    const [selectedTab, setSelectedTab] = useState(0);
+
+    useEffect(() => {
+        if (updateMatchId) {
+            const match = matches.find(m => m.id === updateMatchId);
+            if (match) {
+                // Find the tab index for this match
+                const tabIndex = match.matchType === 'league' ? 0 : 1;
+                setSelectedTab(tabIndex);
+            }
+        }
+    }, [updateMatchId, matches]);
 
     const leagueMatches = matches.filter(match => match.matchType === 'league');
     const playoffMatches = matches.filter(match => match.matchType !== 'league');
@@ -85,8 +98,8 @@ export const Schedule = ({
             
             <Box sx={{ borderBottom: 1, borderColor: '#E0E0E0', mb: 3 }}>
                 <Tabs 
-                    value={currentTab} 
-                    onChange={(_, newValue) => setCurrentTab(newValue)}
+                    value={selectedTab} 
+                    onChange={(_, newValue) => setSelectedTab(newValue)}
                     sx={{
                         '& .MuiTabs-indicator': {
                             backgroundColor: '#FF8C00',
@@ -107,31 +120,20 @@ export const Schedule = ({
                 </Tabs>
             </Box>
 
-            {currentTab === 0 ? (
+            {selectedTab === 0 ? (
                 <Box sx={{ 
                     display: 'grid', 
-                    gridTemplateColumns: {
-                        xs: '1fr',
-                        sm: 'repeat(auto-fit, minmax(350px, 1fr))'
-                    },
-                    gap: 4,
-                    alignItems: 'start'
+                    gap: 3,
+                    gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }
                 }}>
-                    {leagueMatches.map(match => (
-                        <Box 
+                    {leagueMatches.map((match) => (
+                        <MatchCard 
                             key={match.id}
-                            sx={{ 
-                                display: 'flex',
-                                flexDirection: 'column',
-                                height: '100%'
-                            }}
-                        >
-                            <MatchCard 
-                                match={match} 
-                                onUpdate={onMatchUpdate}
-                                currentStage={currentStage}
-                            />
-                        </Box>
+                            match={match}
+                            onUpdate={onMatchUpdate}
+                            currentStage={currentStage}
+                            shouldOpenUpdateDialog={match.id === updateMatchId}
+                        />
                     ))}
                     {leagueMatches.length === 0 && !canStartTournament && (
                         <Box 

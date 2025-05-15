@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Card,
     CardContent,
@@ -24,12 +24,14 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { ScoreboardUploader } from '../ScoreboardUploader';
 import { format } from 'date-fns';
 import CloseIcon from '@mui/icons-material/Close';
+import { useNavigate } from 'react-router-dom';
 
 interface MatchCardProps {
     match: Match;
-    onUpdate?: (match: Match) => void;
+    onUpdate?: (updatedMatch: Match) => void;
     currentStage?: TournamentStage;
     readOnly?: boolean;
+    shouldOpenUpdateDialog?: boolean;
 }
 
 interface TeamScoreProps {
@@ -101,8 +103,10 @@ export const MatchCard = ({
         console.warn('No onUpdate handler provided to MatchCard component');
     }, 
     currentStage,
-    readOnly = false
+    readOnly = false,
+    shouldOpenUpdateDialog = false
 }: MatchCardProps) => {
+    const navigate = useNavigate();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isScreenshotDialogOpen, setIsScreenshotDialogOpen] = useState(false);
     const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(false);
@@ -124,6 +128,14 @@ export const MatchCard = ({
             overs: match.result?.team2Score?.overs ?? ''
         }
     });
+
+    useEffect(() => {
+        if (shouldOpenUpdateDialog) {
+            setIsDialogOpen(true);
+            // Clear the update match ID from session storage
+            sessionStorage.removeItem('updateMatchId');
+        }
+    }, [shouldOpenUpdateDialog]);
 
     const isCompleted = match.status === 'completed';
 
@@ -664,7 +676,7 @@ export const MatchCard = ({
                             <Button
                                 variant="outlined"
                         size="small"
-                                onClick={handleSummaryOpen}
+                                onClick={() => navigate(`/match/${match.id}`)}
                         sx={{
                                     color: '#FF1640',
                                     borderColor: '#FF1640',
