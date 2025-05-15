@@ -5,7 +5,7 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/rc-friends-cricket-league/',
+  base: '',
   server: {
     port: 5175,
   },
