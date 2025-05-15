@@ -906,7 +906,7 @@ export const MatchCard = ({
                                 }}>
                                     {match.venue || 'Eden Gardens, Kolkata'}<br/>
                                     {format(new Date(match.date || new Date()), 'dd MMM yyyy')}<br/>
-                                    {format(new Date(match.time || new Date()), 'h:mm a')} IST
+                                    {match.time || format(new Date(), 'h:mm a')} IST
                             </Typography>
                     </Box>
 
