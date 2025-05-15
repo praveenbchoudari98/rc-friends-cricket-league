@@ -184,9 +184,15 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                 winner = team1Score.runs > team2Score.runs ? match.team1 : match.team2;
             }
 
+            // Preserve the existing toss and innings information
             const updatedMatch: Match = {
                 ...match,
                 status: 'completed',
+                inningsInfo: {
+                    ...match.inningsInfo!,  // Keep existing toss winner and decision
+                    date: match.inningsInfo!.date,
+                    time: match.inningsInfo!.time
+                },
                 result: {
                     team1Score,
                     team2Score,
