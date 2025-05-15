@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="200" height="200" fill="none"/>
+    
+    <!-- RFCL25 Text -->
+    <text x="100" y="160" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" text-anchor="middle" fill="#FFFFFF">
+        <tspan fill="#FFFFFF">RFCL</tspan>
+        <tspan fill="#FF6B00">25</tspan>
+    </text>
+</svg> 
