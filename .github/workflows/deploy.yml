@@ -31,17 +31,27 @@ jobs:
       
       - name: Prepare deployment
         run: |
-          # Create the deployment directory
+          # Debug: Show initial build output
+          echo "Initial build output:"
+          ls -la dist/
+          
+          # Create temporary directory
+          mkdir -p temp_dist
+          
+          # Move all files to temporary directory
+          mv dist/* temp_dist/
+          
+          # Create rc-friends-cricket-league directory
           mkdir -p dist/rc-friends-cricket-league
           
-          # Move the build to the deployment directory
-          mv dist/* dist/rc-friends-cricket-league/ 2>/dev/null || true
+          # Move files from temporary directory to final location
+          mv temp_dist/* dist/rc-friends-cricket-league/
           
           # Create 404.html
           cp dist/rc-friends-cricket-league/index.html dist/rc-friends-cricket-league/404.html
           
-          # Debug: Show the directory structure
-          echo "Directory structure after preparation:"
+          # Debug: Show final directory structure
+          echo "Final directory structure:"
           ls -R dist/
       
       - name: Upload artifact
