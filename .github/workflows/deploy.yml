@@ -28,12 +28,18 @@ jobs:
       
       - name: Build
         run: npm run build
+        env:
+          VITE_BASE_URL: /rc-friends-cricket-league
       
       - name: Prepare deployment
         run: |
           mkdir -p dist/rc-friends-cricket-league
-          cp -r dist/* dist/rc-friends-cricket-league/ 2>/dev/null || true
+          cp -r dist/* dist/rc-friends-cricket-league/ || true
           rm -rf dist/rc-friends-cricket-league/rc-friends-cricket-league || true
+          find dist/rc-friends-cricket-league -type f -name "*.html" -exec sed -i 's|"/assets/|"/rc-friends-cricket-league/assets/|g' {} +
+          find dist/rc-friends-cricket-league -type f -name "*.html" -exec sed -i 's|"/images/|"/rc-friends-cricket-league/images/|g' {} +
+          find dist/rc-friends-cricket-league -type f -name "*.html" -exec sed -i 's|"/media/|"/rc-friends-cricket-league/media/|g' {} +
+          find dist/rc-friends-cricket-league -type f -name "*.html" -exec sed -i 's|"/fonts/|"/rc-friends-cricket-league/fonts/|g' {} +
           cp dist/rc-friends-cricket-league/index.html dist/rc-friends-cricket-league/404.html
       
       - name: Upload artifact
