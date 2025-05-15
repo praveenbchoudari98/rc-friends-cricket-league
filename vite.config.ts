@@ -11,17 +11,14 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    emptyOutDir: true,
     assetsDir: '.',
     sourcemap: false,
     rollupOptions: {
       output: {
-        assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.')
-          const ext = info[info.length - 1]
-          return `${info[0]}.[hash].${ext}`
-        },
-        chunkFileNames: '[name].[hash].js',
-        entryFileNames: '[name].[hash].js'
+        assetFileNames: 'rc-friends-cricket-league/[name].[hash][extname]',
+        chunkFileNames: 'rc-friends-cricket-league/[name].[hash].js',
+        entryFileNames: 'rc-friends-cricket-league/[name].[hash].js'
       },
     },
   },
