@@ -31,21 +31,19 @@ jobs:
       
       - name: Prepare deployment
         run: |
+          # Create test index.html
+          echo "<!DOCTYPE html><html><head><title>Test Page</title></head><body><h1>Test Page</h1><p>If you see this, GitHub Pages is working.</p></body></html>" > dist/test.html
+          
           # Debug: Show initial build output
           echo "Initial build output:"
           ls -la dist/
           
-          # Create temporary directory
-          mkdir -p temp_dist
-          
-          # Move all files to temporary directory
-          mv dist/* temp_dist/
-          
           # Create rc-friends-cricket-league directory
           mkdir -p dist/rc-friends-cricket-league
           
-          # Move files from temporary directory to final location
-          mv temp_dist/* dist/rc-friends-cricket-league/
+          # Move all build files to rc-friends-cricket-league directory
+          mv dist/* dist/rc-friends-cricket-league/ 2>/dev/null || true
+          mv dist/rc-friends-cricket-league/test.html dist/index.html
           
           # Create 404.html
           cp dist/rc-friends-cricket-league/index.html dist/rc-friends-cricket-league/404.html
@@ -53,6 +51,12 @@ jobs:
           # Debug: Show final directory structure
           echo "Final directory structure:"
           ls -R dist/
+          
+          # Show contents of key files
+          echo "Contents of dist/index.html:"
+          cat dist/index.html
+          echo "Contents of dist/rc-friends-cricket-league/index.html:"
+          cat dist/rc-friends-cricket-league/index.html
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
