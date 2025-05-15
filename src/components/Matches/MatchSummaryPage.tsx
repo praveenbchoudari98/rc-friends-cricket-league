@@ -71,9 +71,7 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                         MATCHES
                     </Typography>
                 </Box>
-                <Typography variant="body2" sx={{ color: 'white', fontWeight: 500 }}>
-                    MATCH {match.matchNumber || '57'}
-                </Typography>
+        
             </Box>
 
             {/* Teams and Scores Section */}
