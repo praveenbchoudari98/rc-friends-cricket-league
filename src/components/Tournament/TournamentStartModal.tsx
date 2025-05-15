@@ -17,11 +17,49 @@ interface TournamentStartModalProps {
 }
 
 export const TournamentStartModal = ({ open, onClose, onStart }: TournamentStartModalProps) => {
-    const [matches, setMatches] = useState(1);
+    const [matches, setMatches] = useState<string>('1');
+    const [error, setError] = useState<string>('');
+
+    const handleMatchesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        const numValue = parseInt(value);
+
+        if (value === '') {
+            setMatches('');
+            setError('Please enter a value');
+            return;
+        }
+
+        if (!/^\d+$/.test(value)) {
+            return;
+        }
+
+        if (numValue < 1 || numValue > 5) {
+            setMatches(value);
+            setError('Value must be between 1 and 5');
+        } else {
+            setMatches(value);
+            setError('');
+        }
+    };
+
+    const handleBlur = () => {
+        const numValue = parseInt(matches);
+        if (matches === '' || isNaN(numValue) || numValue < 1) {
+            setMatches('1');
+            setError('');
+        } else if (numValue > 5) {
+            setMatches('5');
+            setError('');
+        }
+    };
 
     const handleStart = () => {
-        onStart({ matchesPerTeamPair: matches });
-        onClose();
+        const numValue = parseInt(matches);
+        if (numValue >= 1 && numValue <= 5) {
+            onStart({ matchesPerTeamPair: numValue });
+            onClose();
+        }
     };
 
     return (
@@ -54,19 +92,25 @@ export const TournamentStartModal = ({ open, onClose, onStart }: TournamentStart
                         label="Matches per team pair"
                         type="number"
                         value={matches}
-                        onChange={(e) => setMatches(Math.max(1, Math.min(5, parseInt(e.target.value) || 1)))}
+                        onChange={handleMatchesChange}
+                        onBlur={handleBlur}
+                        error={!!error}
+                        helperText={error || "Each team will play this many times against every other team (1-5 matches)"}
                         InputProps={{ 
-                            inputProps: { min: 1, max: 5 }
+                            inputProps: { 
+                                min: 1, 
+                                max: 5,
+                                step: 1
+                            }
                         }}
-                        helperText="Each team will play this many times against every other team (1-5 matches)"
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '&.Mui-focused fieldset': {
-                                    borderColor: '#FF6B00'
+                                    borderColor: error ? 'error.main' : '#FF6B00'
                                 }
                             },
                             '& .MuiInputLabel-root.Mui-focused': {
-                                color: '#FF6B00'
+                                color: error ? 'error.main' : '#FF6B00'
                             }
                         }}
                     />
@@ -87,11 +131,15 @@ export const TournamentStartModal = ({ open, onClose, onStart }: TournamentStart
                 <Button
                     onClick={handleStart}
                     variant="contained"
+                    disabled={!!error || matches === ''}
                     sx={{
                         bgcolor: '#FF6B00',
                         color: 'white',
                         '&:hover': {
                             bgcolor: '#cc5500'
+                        },
+                        '&.Mui-disabled': {
+                            bgcolor: 'rgba(255,107,0,0.5)'
                         }
                     }}
                 >
