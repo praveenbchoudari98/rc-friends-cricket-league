@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, KeyboardEvent } from 'react';
 import {
     Card,
     CardContent,
@@ -25,6 +25,7 @@ import { ScoreboardUploader } from '../ScoreboardUploader';
 import { format } from 'date-fns';
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
+import { getVictoryMargin } from '../../utils/matchUtils';
 
 interface MatchCardProps {
     match: Match;
@@ -38,6 +39,17 @@ interface TeamScoreProps {
     team: Team;
     score?: Score;
     isCompleted?: boolean;
+}
+
+interface ScoreState {
+    runs: string | number;
+    wickets: string | number;
+    overs: string | number;
+}
+
+interface ScoresState {
+    team1: ScoreState;
+    team2: ScoreState;
 }
 
 const TeamScore = ({ team, score, isCompleted }: TeamScoreProps) => (
@@ -116,7 +128,7 @@ export const MatchCard = ({
     const [matchTime, setMatchTime] = useState<string>(format(new Date(), 'HH:mm'));
     const [venue, setVenue] = useState<string>('Wankhede Stadium, Mumbai');
     const [currentStep, setCurrentStep] = useState(1);
-    const [scores, setScores] = useState({
+    const [scores, setScores] = useState<ScoresState>({
         team1: {
             runs: match.result?.team1Score?.runs ?? '',
             wickets: match.result?.team1Score?.wickets ?? '',
@@ -266,101 +278,76 @@ export const MatchCard = ({
         return Math.max(numValue, 0);
     };
 
+    const handleScoreChange = (team: 'team1' | 'team2', field: 'runs' | 'wickets' | 'overs') => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value ? validateField(field, e.target.value) : '';
+        setScores((prev: ScoresState) => ({
+            ...prev,
+            [team]: { ...prev[team], [field]: value }
+        }));
+    };
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (['e', '+', '-'].includes(e.key)) {
+            e.preventDefault();
+        }
+    };
+
+    const validateField = (field: 'runs' | 'wickets' | 'overs', value: string): string | number => {
+        switch (field) {
+            case 'runs':
+                return validateRuns(value);
+            case 'wickets':
+                return validateWickets(value);
+            case 'overs':
+                return validateOvers(value);
+            default:
+                return value;
+        }
+    };
+
     const renderScoreInputs = (team: 'team1' | 'team2', teamName: string) => (
         <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle1" gutterBottom>
                 {teamName}
             </Typography>
-            <Stack direction="row" spacing={2}>
+            <Stack spacing={2}>
                 <TextField
                     label="Runs"
                     type="number"
                     value={scores[team].runs}
-                    onChange={(e) => {
-                        // Only allow numeric input
-                        const value = e.target.value.replace(/[^0-9]/g, '');
-                        const validatedValue = value ? validateRuns(value) : '';
-                        setScores(prev => ({
-                            ...prev,
-                            [team]: { ...prev[team], runs: validatedValue }
-                        }));
-                    }}
-                    onKeyDown={(e) => {
-                        // Prevent non-numeric input including 'e', '+', '-'
-                        if (![
-                            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                            'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'
-                        ].includes(e.key)) {
-                            e.preventDefault();
-                        }
-                    }}
+                    onChange={handleScoreChange(team, 'runs')}
+                    onKeyDown={handleKeyDown}
                     fullWidth
                     placeholder="Enter runs"
-                    InputLabelProps={{ shrink: true }}
-                    inputProps={{ 
-                        min: 0,
-                        inputMode: 'numeric',
-                        pattern: '[0-9]*'
-                    }}
-                    error={typeof scores[team].runs === 'number' && scores[team].runs < 0}
-                    helperText={typeof scores[team].runs === 'number' && scores[team].runs < 0 ? 'Runs must be positive' : ''}
+                    InputLabelProps={{ shrink: true, children: "Runs" }}
+                    inputProps={{ min: 0, 'data-testid': 'runs-input' }}
                 />
                 <TextField
                     label="Wickets"
                     type="number"
                     value={scores[team].wickets}
-                    onChange={(e) => {
-                        const value = e.target.value ? validateWickets(e.target.value) : '';
-                        setScores(prev => ({
-                            ...prev,
-                            [team]: { ...prev[team], wickets: value }
-                        }));
-                    }}
+                    onChange={handleScoreChange(team, 'wickets')}
+                    onKeyDown={handleKeyDown}
                     fullWidth
                     placeholder="Enter wickets"
-                    InputLabelProps={{ shrink: true }}
-                    inputProps={{ min: 0, max: 10 }}
-                    error={typeof scores[team].wickets === 'number' && (scores[team].wickets < 0 || scores[team].wickets > 10)}
-                    helperText={
-                        typeof scores[team].wickets === 'number' && scores[team].wickets < 0 
-                            ? 'Wickets must be positive'
-                            : typeof scores[team].wickets === 'number' && scores[team].wickets > 10 
-                            ? 'Maximum 10 wickets allowed'
-                            : ''
-                    }
+                    InputLabelProps={{ shrink: true, children: "Wickets" }}
+                    inputProps={{ min: 0, max: 10, 'data-testid': 'wickets-input' }}
                 />
                 <TextField
                     label="Overs"
                     type="number"
                     value={scores[team].overs}
-                    onChange={(e) => {
-                        const value = e.target.value ? validateOvers(e.target.value) : '';
-                        setScores(prev => ({
-                            ...prev,
-                            [team]: { ...prev[team], overs: value }
-                        }));
-                    }}
+                    onChange={handleScoreChange(team, 'overs')}
+                    onKeyDown={handleKeyDown}
                     fullWidth
                     placeholder="Enter overs"
-                    InputLabelProps={{ shrink: true }}
+                    InputLabelProps={{ shrink: true, children: "Overs" }}
                     inputProps={{ 
                         min: 0, 
                         max: match.matchType === 'super_duper_over' ? 2 : 20, 
                         step: 0.1,
                         'data-testid': 'overs-input'
                     }}
-                    error={typeof scores[team].overs === 'number' && (
-                        scores[team].overs < 0 || 
-                        scores[team].overs > (match.matchType === 'super_duper_over' ? 2 : 20)
-                    )}
-                    helperText={
-                        typeof scores[team].overs === 'number' && scores[team].overs < 0 
-                            ? 'Overs must be positive'
-                            : typeof scores[team].overs === 'number' && 
-                              scores[team].overs > (match.matchType === 'super_duper_over' ? 2 : 20)
-                            ? `Maximum ${match.matchType === 'super_duper_over' ? 2 : 20} overs allowed`
-                            : ''
-                    }
                 />
             </Stack>
         </Box>
@@ -589,18 +576,18 @@ export const MatchCard = ({
                             </Typography>
                     </Box>
                     {!readOnly && (
-                        <Tooltip title="Upload Scoreboard Screenshot">
+                        <Tooltip title="Upload Scoreboard Screenshot" arrow>
                             <IconButton
                                 size="small"
                                 onClick={handleScreenshotDialogOpen}
-                    sx={{ 
+                                sx={{ 
                                     color: '#666666',
                                     padding: '6px',
                                     '&:hover': {
                                         backgroundColor: 'rgba(0,0,0,0.04)' 
                                     }
-                    }}
-                >
+                                }}
+                            >
                                 <AddPhotoAlternateIcon sx={{ fontSize: '1.25rem' }} />
                             </IconButton>
                         </Tooltip>
@@ -623,15 +610,7 @@ export const MatchCard = ({
                                 lineHeight: 1.2
                             }}
                         >
-                            {match.result.winner.name} WON BY {
-                                match.result.winner.id === match.team1.id 
-                                    ? match.result.team1Score.runs > match.result.team2Score.runs
-                                        ? `${match.result.team1Score.runs - match.result.team2Score.runs} RUNS`
-                                        : `${10 - match.result.team1Score.wickets} WICKETS`
-                                    : match.result.team2Score.runs > match.result.team1Score.runs
-                                        ? `${match.result.team2Score.runs - match.result.team1Score.runs} RUNS`
-                                        : `${10 - match.result.team2Score.wickets} WICKETS`
-                            }
+                            {match.result.winner.name} {getVictoryMargin(match).toUpperCase()}
                             </Typography>
                     )}
                     {isCompleted && match.result?.result === 'tie' && (
@@ -669,74 +648,80 @@ export const MatchCard = ({
                         <Box sx={{
                         mt: 2,
                                     display: 'flex', 
-                        justifyContent: 'center',
+                            justifyContent: 'center',
                         gap: 2
                     }}>
                         {isCompleted ? (
                             <Button
                                 variant="outlined"
-                        size="small"
+                                size="small"
                                 onClick={() => navigate(`/match/${match.id}`)}
-                        sx={{
-                                    color: '#FF1640',
-                                    borderColor: '#FF1640',
+                                sx={{ 
+                                    color: '#fff',
+                                    bgcolor: '#4CAF50',
                                     textTransform: 'none',
                                     fontSize: '0.875rem',
                                     fontWeight: 600,
-                                    padding: '8px 24px',
+                                    padding: '8px 32px',
                                     minWidth: '140px',
-                                    borderRadius: '4px',
-                                    borderWidth: '1.5px',
+                                    borderRadius: '0',
+                                    border: 'none',
                                     position: 'relative',
                                     overflow: 'hidden',
+                                    transform: 'skew(-12deg)',
                                     transition: 'all 0.3s ease',
+                                    '& > span': {
+                                        display: 'inline-block',
+                                        transform: 'skew(12deg)',
+                                    },
                                     '&:hover': {
-                                        borderColor: '#FF1640',
-                                        backgroundColor: 'rgba(255, 22, 64, 0.04)',
-                                        transform: 'translateY(-1px)',
-                                        boxShadow: '0 4px 8px rgba(255, 22, 64, 0.15)',
+                                        bgcolor: '#388E3C',
+                                        transform: 'skew(-12deg) translateY(-2px)',
+                                        boxShadow: '0 4px 8px rgba(76, 175, 80, 0.25)',
                                     },
                                     '&:active': {
-                                        transform: 'translateY(0)',
-                                        boxShadow: '0 2px 4px rgba(255, 22, 64, 0.1)',
-                                    },
-                                    '&::before': {
-                                        content: '""',
-                            position: 'absolute',
-                                        top: 0,
-                                        left: '-100%',
-                                        width: '100%',
-                                        height: '100%',
-                                        background: 'linear-gradient(90deg, transparent, rgba(255, 22, 64, 0.1), transparent)',
-                                        transition: 'all 0.6s ease',
-                                    },
-                                    '&:hover::before': {
-                                        left: '100%',
+                                        transform: 'skew(-12deg) translateY(0)',
+                                        boxShadow: '0 2px 4px rgba(76, 175, 80, 0.2)',
                                     }
                                 }}
                             >
-                                View Summary
+                                <span>Match Centre</span>
                             </Button>
                         ) : !readOnly && (
                             <Button
-                                variant="contained"
+                                variant="outlined"
                                 size="small"
                                 onClick={handleOpenDialog}
-                                sx={{
+                                sx={{ 
+                                    color: '#fff',
                                     bgcolor: '#FF1640',
-                            color: 'white',
                                     textTransform: 'none',
                                     fontSize: '0.875rem',
-                                        fontWeight: 500,
-                                    padding: '6px 16px',
-                                    minWidth: '100px',
-                                    borderRadius: '4px',
+                                    fontWeight: 600,
+                                    padding: '8px 32px',
+                                    minWidth: '140px',
+                                    borderRadius: '0',
+                                    border: 'none',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    transform: 'skew(-12deg)',
+                                    transition: 'all 0.3s ease',
+                                    '& > span': {
+                                        display: 'inline-block',
+                                        transform: 'skew(12deg)',
+                                    },
                                     '&:hover': {
-                                        bgcolor: '#E31236'
+                                        bgcolor: '#E31236',
+                                        transform: 'skew(-12deg) translateY(-2px)',
+                                        boxShadow: '0 4px 8px rgba(255, 22, 64, 0.25)',
+                                    },
+                                    '&:active': {
+                                        transform: 'skew(-12deg) translateY(0)',
+                                        boxShadow: '0 2px 4px rgba(255, 22, 64, 0.2)',
                                     }
                                 }}
                             >
-                                Add Score
+                                <span>Add Score</span>
                             </Button>
                         )}
                             </Box>
@@ -750,12 +735,14 @@ export const MatchCard = ({
                 maxWidth="sm"
                 fullWidth
                 keepMounted={false}
-                disablePortal
-                aria-labelledby="score-dialog-title"
                 sx={{ 
-                    '& .MuiDialog-root': { inset: 0 },
-                    '& .MuiDialog-paper': { 
-                        zIndex: (theme) => theme.zIndex.modal + 1 
+                    '& .MuiBackdrop-root': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                    },
+                    '& .MuiDialog-paper': {
+                        margin: 2,
+                        borderRadius: 1,
+                        boxShadow: 24
                     }
                 }}
             >
@@ -971,15 +958,7 @@ export const MatchCard = ({
                                 }}
                             >
                                 {match.result?.result === 'tie' ? 'Match Tied' : 
-                                    match.result?.winner && `${match.result.winner.name} Won by ${
-                                        match.result.winner.id === match.team1.id 
-                                            ? match.result.team1Score.runs > match.result.team2Score.runs
-                                                ? `${match.result.team1Score.runs - match.result.team2Score.runs} runs`
-                                                : `${10 - match.result.team1Score.wickets} wickets`
-                                            : match.result.team2Score.runs > match.result.team1Score.runs
-                                                ? `${match.result.team2Score.runs - match.result.team1Score.runs} runs`
-                                                : `${10 - match.result.team2Score.wickets} wickets`
-                                    }`
+                                    match.result?.winner && `${match.result.winner.name} ${getVictoryMargin(match)}`
                                 }
                             </Typography>
                     </Box>

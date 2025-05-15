@@ -16,6 +16,7 @@ import type { Match, Score, Team } from '../../types';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { getVictoryMargin } from '../../utils/matchUtils';
 
 interface MatchSummaryPageProps {
     match: Match;
@@ -213,29 +214,7 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
 
     const { team1, team2 } = match;
     const { team1Score, team2Score } = match.result;
-    const { date, time } = match.inningsInfo;
-
-    const getVictoryMargin = () => {
-        if (!match.result || !match.inningsInfo) {
-            return '';
-        }
-        
-        if (!match.result.winner) {
-            return 'Match Tied';
-        }
-
-        const battingFirstTeam = match.inningsInfo.battingFirst;
-        const battingFirstScore = battingFirstTeam.id === match.team1.id ? match.result.team1Score : match.result.team2Score;
-        const battingSecondScore = battingFirstTeam.id === match.team1.id ? match.result.team2Score : match.result.team1Score;
-        
-        // If batting first team won, they won by runs
-        if (match.result.winner.id === battingFirstTeam.id) {
-            return `${battingFirstScore.runs - battingSecondScore.runs} runs`;
-        } else {
-            // If chasing team won, they won by wickets
-            return `${10 - battingSecondScore.wickets} wickets`;
-        }
-    };
+    const { tossWinner, tossDecision, battingFirst, date, time } = match.inningsInfo;
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: '#1a2d7d' }}>
@@ -411,7 +390,7 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                     }}>
                         {match.result.result === 'tie' 
                             ? 'Match Tied'
-                            : `${match.result.winner?.name} Won by ${getVictoryMargin()}`
+                            : `${match.result.winner?.name} ${getVictoryMargin(match)}`
                         }
                     </Typography>
                 </Box>
