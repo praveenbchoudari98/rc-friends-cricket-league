@@ -128,10 +128,10 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                             mb: 2,
                             display: 'inline-block'
                         }}>
-                            MATCH {match.matchNumber || '57'}
+                            MATCH {match.matchNumber}
                         </Box>
                         <Typography variant="body2" sx={{ mb: 0.5 }}>
-                            Eden Gardens, Kolkata
+                            {match.venue || 'Wankhede Stadium, Mumbai'}
                         </Typography>
                         <Typography variant="body2" sx={{ mb: 0.5 }}>
                             {format(new Date(date), 'dd MMM yyyy')}
