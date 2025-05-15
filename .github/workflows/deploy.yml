@@ -32,7 +32,8 @@ jobs:
       - name: Prepare deployment
         run: |
           mkdir -p dist/rc-friends-cricket-league
-          mv dist/* dist/rc-friends-cricket-league/ 2>/dev/null || true
+          cp -r dist/* dist/rc-friends-cricket-league/ 2>/dev/null || true
+          rm -rf dist/rc-friends-cricket-league/rc-friends-cricket-league || true
           cp dist/rc-friends-cricket-league/index.html dist/rc-friends-cricket-league/404.html
       
       - name: Upload artifact

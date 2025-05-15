@@ -17,21 +17,21 @@ export default defineConfig(({ command }) => ({
       output: {
         assetFileNames: (assetInfo) => {
           if (command === 'serve') {
-            return '[name].[hash][extname]'
+            return 'assets/[name].[hash][extname]'
           }
           return 'assets/[name].[hash][extname]'
         },
         chunkFileNames: (chunkInfo) => {
           if (command === 'serve') {
-            return '[name].[hash].js'
+            return 'assets/[name].[hash].js'
           }
-          return 'js/[name].[hash].js'
+          return 'assets/[name].[hash].js'
         },
         entryFileNames: (chunkInfo) => {
           if (command === 'serve') {
-            return '[name].[hash].js'
+            return 'assets/[name].[hash].js'
           }
-          return 'js/[name].[hash].js'
+          return 'assets/[name].[hash].js'
         }
       },
     },
