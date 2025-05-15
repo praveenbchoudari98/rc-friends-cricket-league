@@ -3,9 +3,9 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ command, mode }) => ({
   plugins: [react()],
-  base: command === 'serve' ? '/' : '/rc-friends-cricket-league/',
+  base: '/rc-friends-cricket-league/',
   server: {
     port: 5175,
   },
@@ -19,18 +19,18 @@ export default defineConfig(({ command }) => ({
           const info = assetInfo.name.split('.')
           const ext = info[info.length - 1]
           if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)) {
-            return `media/[name].[hash][extname]`
+            return `assets/media/[name].[hash][extname]`
           }
           if (/\.(png|jpe?g|gif|svg|ico|webp)(\?.*)?$/i.test(assetInfo.name)) {
-            return `images/[name].[hash][extname]`
+            return `assets/images/[name].[hash][extname]`
           }
           if (/\.(woff2?|eot|ttf|otf)(\?.*)?$/i.test(assetInfo.name)) {
-            return `fonts/[name].[hash][extname]`
+            return `assets/fonts/[name].[hash][extname]`
           }
           return `assets/[name].[hash][extname]`
         },
-        chunkFileNames: 'assets/[name].[hash].js',
-        entryFileNames: 'assets/[name].[hash].js'
+        chunkFileNames: 'assets/js/[name].[hash].js',
+        entryFileNames: 'assets/js/[name].[hash].js'
       }
     }
   }

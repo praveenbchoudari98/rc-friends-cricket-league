@@ -28,19 +28,24 @@ jobs:
       
       - name: Build
         run: npm run build
-        env:
-          VITE_BASE_URL: /rc-friends-cricket-league
       
       - name: Prepare deployment
         run: |
+          # Create the deployment directory
           mkdir -p dist/rc-friends-cricket-league
+          
+          # Copy all files to the deployment directory
           cp -r dist/* dist/rc-friends-cricket-league/ || true
+          
+          # Remove any nested rc-friends-cricket-league directories
           rm -rf dist/rc-friends-cricket-league/rc-friends-cricket-league || true
-          find dist/rc-friends-cricket-league -type f -name "*.html" -exec sed -i 's|"/assets/|"/rc-friends-cricket-league/assets/|g' {} +
-          find dist/rc-friends-cricket-league -type f -name "*.html" -exec sed -i 's|"/images/|"/rc-friends-cricket-league/images/|g' {} +
-          find dist/rc-friends-cricket-league -type f -name "*.html" -exec sed -i 's|"/media/|"/rc-friends-cricket-league/media/|g' {} +
-          find dist/rc-friends-cricket-league -type f -name "*.html" -exec sed -i 's|"/fonts/|"/rc-friends-cricket-league/fonts/|g' {} +
+          
+          # Create 404.html
           cp dist/rc-friends-cricket-league/index.html dist/rc-friends-cricket-league/404.html
+          
+          # Debug: Show the directory structure
+          echo "Directory structure after preparation:"
+          ls -R dist/
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
