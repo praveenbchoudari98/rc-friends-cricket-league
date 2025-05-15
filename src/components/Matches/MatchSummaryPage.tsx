@@ -53,13 +53,13 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                 px: 2,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 2
+                gap: 2,
+                justifyContent: 'space-between'
             }}>
                 <Box sx={{ 
                     display: 'flex', 
                     alignItems: 'center', 
-                    gap: 2,
-                    flex: 1
+                    gap: 2
                 }}>
                     <IconButton 
                         onClick={() => navigate(-1)}
@@ -71,7 +71,22 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                         MATCHES
                     </Typography>
                 </Box>
-        
+                
+                {onUpdateScores && (
+                    <Button 
+                        onClick={onUpdateScores}
+                        variant="contained"
+                        sx={{
+                            bgcolor: '#FF6B00',
+                            color: 'white',
+                            '&:hover': {
+                                bgcolor: '#cc5500'
+                            }
+                        }}
+                    >
+                        Update Score
+                    </Button>
+                )}
             </Box>
 
             {/* Teams and Scores Section */}
