@@ -1,5 +1,6 @@
 {
-  "name": "cricket-tournament-manager",
+  "name": "rc-friends-cricket-league",
+  "description": "A cricket tournament management system for RC Friends League",
   "private": true,
   "version": "0.0.0",
   "type": "module",
