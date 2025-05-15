@@ -1,13 +1,16 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
+import { TournamentProvider } from './context/TournamentContext'
 import AppRouter from './routes'
 import './index.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
     <HashRouter>
-      <AppRouter />
+      <TournamentProvider>
+        <AppRouter />
+      </TournamentProvider>
     </HashRouter>
-  </React.StrictMode>,
+  </StrictMode>,
 )
