@@ -12,7 +12,7 @@ import {
     Stack
 } from '@mui/material';
 import { format } from 'date-fns';
-import type { Match, Score } from '../../types';
+import type { Match, Score, Team } from '../../types';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -175,11 +175,11 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
             };
 
             let result: 'win' | 'tie' = 'win';
-            let winner = match.team1;
+            let winner: Team | null = null;
 
             if (team1Score.runs === team2Score.runs) {
                 result = 'tie';
-                winner = undefined;
+                winner = null;
             } else {
                 winner = team1Score.runs > team2Score.runs ? match.team1 : match.team2;
             }
@@ -191,7 +191,7 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                     team1Score,
                     team2Score,
                     result,
-                    winner
+                    winner: winner || match.team1 // Fallback to team1 to satisfy type requirement
                 }
             };
 
@@ -210,22 +210,24 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
     const { date, time } = match.inningsInfo;
 
     const getVictoryMargin = () => {
-        if (!match.result) {
+        if (!match.result || !match.inningsInfo) {
             return '';
         }
         
         if (!match.result.winner) {
             return 'Match Tied';
         }
+
+        const battingFirstTeam = match.inningsInfo.battingFirst;
+        const battingFirstScore = battingFirstTeam.id === match.team1.id ? match.result.team1Score : match.result.team2Score;
+        const battingSecondScore = battingFirstTeam.id === match.team1.id ? match.result.team2Score : match.result.team1Score;
         
-        if (match.result.winner.id === team1.id) {
-            return match.result.team1Score.runs > match.result.team2Score.runs
-                ? `${match.result.team1Score.runs - match.result.team2Score.runs} runs`
-                : `${10 - match.result.team1Score.wickets} wickets`;
+        // If batting first team won, they won by runs
+        if (match.result.winner.id === battingFirstTeam.id) {
+            return `${battingFirstScore.runs - battingSecondScore.runs} runs`;
         } else {
-            return match.result.team2Score.runs > match.result.team1Score.runs
-                ? `${match.result.team2Score.runs - match.result.team1Score.runs} runs`
-                : `${10 - match.result.team2Score.wickets} wickets`;
+            // If chasing team won, they won by wickets
+            return `${10 - battingSecondScore.wickets} wickets`;
         }
     };
 
