@@ -1,88 +1,55 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from '@mui/material';
 
 export const theme = createTheme({
   palette: {
-    mode: 'light',
     primary: {
       main: '#FF8C00',
-      light: '#FFA333',
       dark: '#E67E00',
-      contrastText: '#FFFFFF',
+      light: '#FFA333',
     },
     secondary: {
       main: '#424242',
-      light: '#616161',
       dark: '#303030',
-      contrastText: '#FFFFFF',
+      light: '#616161',
     },
     background: {
       default: '#FFFFFF',
       paper: '#FFFFFF',
     },
     text: {
-      primary: '#424242',
+      primary: '#303030',
       secondary: '#616161',
     },
   },
   typography: {
-    fontFamily: 'Montserrat, sans-serif',
-    h1: {
-      fontWeight: 700,
-      letterSpacing: '0.02em',
-      color: '#FF8C00',
-    },
-    h2: {
-      fontWeight: 600,
-      letterSpacing: '0.02em',
-      color: '#FF8C00',
-    },
-    h3: {
-      fontWeight: 600,
-      letterSpacing: '0.02em',
-      color: '#FF8C00',
-    },
+    fontFamily: '"Montserrat", "Roboto", "Arial", sans-serif',
     h4: {
-      fontWeight: 600,
-      letterSpacing: '0.02em',
+      fontWeight: 700,
       color: '#FF8C00',
+      letterSpacing: '-0.02em',
     },
     h5: {
       fontWeight: 600,
-      letterSpacing: '0.02em',
-      color: '#FF8C00',
+      color: '#424242',
+      letterSpacing: '-0.01em',
     },
     h6: {
       fontWeight: 600,
-      letterSpacing: '0.02em',
-      color: '#FF8C00',
+      color: '#424242',
+      letterSpacing: '-0.01em',
     },
     button: {
+      textTransform: 'none',
       fontWeight: 600,
-      letterSpacing: '0.05em',
-      textTransform: 'uppercase',
+      letterSpacing: '0.02em',
     },
   },
   components: {
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: 'linear-gradient(135deg, #FF8C00 0%, #E67E00 100%)',
-          boxShadow: '0 2px 8px rgba(255, 140, 0, 0.1)',
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          background: '#FFFFFF',
-          borderRadius: 16,
-          border: '1px solid rgba(255, 140, 0, 0.08)',
-          boxShadow: '0 4px 12px rgba(255, 140, 0, 0.05)',
-          transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-          '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0 8px 24px rgba(255, 140, 0, 0.1)',
-          },
+          background: 'linear-gradient(135deg, #424242 0%, #303030 100%)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
         },
       },
     },
@@ -91,42 +58,45 @@ export const theme = createTheme({
         root: {
           borderRadius: 8,
           textTransform: 'uppercase',
-          padding: '8px 24px',
+          fontWeight: 600,
+          padding: '10px 20px',
           transition: 'all 0.2s ease-in-out',
         },
-        contained: {
+        containedPrimary: {
           background: 'linear-gradient(135deg, #FF8C00 0%, #E67E00 100%)',
-          color: '#FFFFFF',
           '&:hover': {
             background: 'linear-gradient(135deg, #E67E00 0%, #CC7000 100%)',
             transform: 'translateY(-2px)',
             boxShadow: '0 4px 12px rgba(255, 140, 0, 0.2)',
           },
         },
-        outlined: {
-          borderColor: '#FF8C00',
-          color: '#FF8C00',
+        containedSecondary: {
+          background: 'linear-gradient(135deg, #424242 0%, #303030 100%)',
           '&:hover': {
-            borderColor: '#E67E00',
-            background: 'rgba(255, 140, 0, 0.05)',
+            background: 'linear-gradient(135deg, #303030 0%, #212121 100%)',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 12px rgba(48, 48, 48, 0.2)',
+          },
+        },
+        outlined: {
+          borderWidth: '2px',
+          '&:hover': {
+            borderWidth: '2px',
             transform: 'translateY(-2px)',
           },
         },
       },
     },
-    MuiTextField: {
+    MuiCard: {
       styleOverrides: {
         root: {
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              borderColor: 'rgba(255, 140, 0, 0.23)',
-            },
-            '&:hover fieldset': {
-              borderColor: '#FF8C00',
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: '#FF8C00',
-            },
+          borderRadius: 16,
+          border: '1px solid rgba(0, 0, 0, 0.08)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+          transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 8px 24px rgba(255, 140, 0, 0.1)',
           },
         },
       },
@@ -134,9 +104,8 @@ export const theme = createTheme({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          background: '#FFFFFF',
           borderRadius: 16,
-          boxShadow: '0 8px 32px rgba(255, 140, 0, 0.08)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
         },
       },
     },

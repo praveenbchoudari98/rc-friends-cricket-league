@@ -558,7 +558,7 @@ export const MatchCard = ({
             >
                 {/* Match Info Header */}
                         <Box sx={{
-                                    display: 'flex', 
+                    display: 'flex',
                                     alignItems: 'center',
                             gap: 2,
                     p: '12px 16px',
@@ -583,7 +583,7 @@ export const MatchCard = ({
                                 sx={{ 
                                     color: '#666666',
                                     padding: '6px',
-                                    '&:hover': {
+                    '&:hover': {
                                         backgroundColor: 'rgba(0,0,0,0.04)' 
                                     }
                                 }}
@@ -602,14 +602,14 @@ export const MatchCard = ({
                     {isCompleted && match.result?.winner && (
                             <Typography 
                             variant="body2" 
-                                sx={{ 
+                    sx={{ 
                                 mb: 2,
                                 fontWeight: 600,
                                 color: '#1A1A1A',
                                 fontSize: '0.875rem',
                                 lineHeight: 1.2
-                            }}
-                        >
+                    }}
+                >
                             {match.result.winner.name} {getVictoryMargin(match).toUpperCase()}
                             </Typography>
                     )}
@@ -617,7 +617,7 @@ export const MatchCard = ({
                             <Typography 
                                 variant="body2" 
                         sx={{
-                                mb: 2,
+                            mb: 2,
                             fontWeight: 600,
                                 color: '#1A1A1A'
                                 }}
@@ -628,7 +628,7 @@ export const MatchCard = ({
 
                     {/* Teams */}
                     <Box sx={{
-                        display: 'flex',
+                            display: 'flex',
                         flexDirection: 'column',
                         gap: 2.5
                     }}>
@@ -690,14 +690,14 @@ export const MatchCard = ({
                         ) : !readOnly && (
                             <Button
                                 variant="outlined"
-                                size="small"
+                        size="small"
                                 onClick={handleOpenDialog}
-                                sx={{ 
+                        sx={{
                                     color: '#fff',
                                     bgcolor: '#FF1640',
                                     textTransform: 'none',
                                     fontSize: '0.875rem',
-                                    fontWeight: 600,
+                            fontWeight: 600,
                                     padding: '8px 32px',
                                     minWidth: '140px',
                                     borderRadius: '0',
@@ -719,7 +719,7 @@ export const MatchCard = ({
                                         transform: 'skew(-12deg) translateY(0)',
                                         boxShadow: '0 2px 4px rgba(255, 22, 64, 0.2)',
                                     }
-                                }}
+                        }}
                             >
                                 <span>Add Score</span>
                             </Button>

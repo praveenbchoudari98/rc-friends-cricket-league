@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { 
-    Dialog, 
-    DialogTitle, 
-    DialogContent, 
-    DialogActions, 
-    Button, 
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
     TextField,
     Typography,
     Box
@@ -63,8 +63,8 @@ export const TournamentStartModal = ({ open, onClose, onStart }: TournamentStart
     };
 
     return (
-        <Dialog 
-            open={open} 
+        <Dialog
+            open={open}
             onClose={onClose}
             maxWidth="sm"
             fullWidth
@@ -75,7 +75,7 @@ export const TournamentStartModal = ({ open, onClose, onStart }: TournamentStart
                 }
             }}
         >
-            <DialogTitle sx={{ 
+            <DialogTitle sx={{
                 bgcolor: '#001838',
                 color: 'white',
                 py: 2
@@ -96,9 +96,9 @@ export const TournamentStartModal = ({ open, onClose, onStart }: TournamentStart
                         onBlur={handleBlur}
                         error={!!error}
                         helperText={error || "Each team will play this many times against every other team (1-5 matches)"}
-                        InputProps={{ 
-                            inputProps: { 
-                                min: 1, 
+                        InputProps={{
+                            inputProps: {
+                                min: 1,
                                 max: 5,
                                 step: 1
                             }
@@ -117,9 +117,9 @@ export const TournamentStartModal = ({ open, onClose, onStart }: TournamentStart
                 </Box>
             </DialogContent>
             <DialogActions sx={{ p: 2, bgcolor: '#f8f9fa' }}>
-                <Button 
+                <Button
                     onClick={onClose}
-                    sx={{ 
+                    sx={{
                         color: '#001838',
                         '&:hover': {
                             bgcolor: 'rgba(0,24,56,0.04)'
@@ -148,4 +148,4 @@ export const TournamentStartModal = ({ open, onClose, onStart }: TournamentStart
             </DialogActions>
         </Dialog>
     );
-}; 
+}

@@ -66,14 +66,14 @@ export const Schedule = ({
     const playoffMatches = matches.filter(match => match.matchType !== 'league');
 
     return (
-        <Box sx={{ 
-            maxWidth: 1200, 
-            mx: 'auto', 
+        <Box sx={{
+            maxWidth: 1200,
+            mx: 'auto',
             px: { xs: 2, sm: 3 },
             py: { xs: 3, sm: 4 }
         }}>
             <Box
-                sx={{ 
+                sx={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -83,9 +83,9 @@ export const Schedule = ({
                     transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
                 }}
             >
-                <Typography 
-                    variant="h4" 
-                    sx={{ 
+                <Typography
+                    variant="h4"
+                    sx={{
                         background: 'linear-gradient(45deg, #FF8C00, #FF1640)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
@@ -120,10 +120,10 @@ export const Schedule = ({
                     </Button>
                 )}
             </Box>
-            
-            <Paper 
+
+            <Paper
                 elevation={0}
-                sx={{ 
+                sx={{
                     borderRadius: '12px',
                     overflow: 'hidden',
                     bgcolor: 'background.paper',
@@ -132,8 +132,8 @@ export const Schedule = ({
                     mb: 3
                 }}
             >
-                <Tabs 
-                    value={selectedTab} 
+                <Tabs
+                    value={selectedTab}
                     onChange={(_, newValue) => setSelectedTab(newValue)}
                     sx={{
                         '& .MuiTabs-indicator': {
@@ -159,8 +159,8 @@ export const Schedule = ({
                         }
                     }}
                 >
-                    <Tab 
-                        label="League Matches" 
+                    <Tab
+                        label="League Matches"
                         onMouseEnter={() => setHoveredTab(0)}
                         onMouseLeave={() => setHoveredTab(null)}
                         sx={{
@@ -178,8 +178,8 @@ export const Schedule = ({
                             } : {}
                         }}
                     />
-                    <Tab 
-                        label="Playoffs" 
+                    <Tab
+                        label="Playoffs"
                         onMouseEnter={() => setHoveredTab(1)}
                         onMouseLeave={() => setHoveredTab(null)}
                         sx={{
@@ -208,11 +208,11 @@ export const Schedule = ({
                 }}
             >
                 {selectedTab === 0 ? (
-                    <Box sx={{ 
-                        display: 'grid', 
+                    <Box sx={{
+                        display: 'grid',
                         gap: 3,
-                        gridTemplateColumns: { 
-                            xs: '1fr', 
+                        gridTemplateColumns: {
+                            xs: '1fr',
                             md: 'repeat(auto-fill, minmax(400px, 1fr))'
                         }
                     }}>
@@ -225,7 +225,7 @@ export const Schedule = ({
                                     transition: `opacity 0.5s ease-out ${index * 0.1}s, transform 0.5s ease-out ${index * 0.1}s`
                                 }}
                             >
-                                <MatchCard 
+                                <MatchCard
                                     match={match}
                                     onUpdate={onMatchUpdate}
                                     currentStage={currentStage}
@@ -235,7 +235,7 @@ export const Schedule = ({
                         ))}
                         {leagueMatches.length === 0 && !canStartTournament && (
                             <Box
-                                sx={{ 
+                                sx={{
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
@@ -251,9 +251,9 @@ export const Schedule = ({
                                     transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
                                 }}
                             >
-                                <Typography 
-                                    variant="h6" 
-                                    sx={{ 
+                                <Typography
+                                    variant="h6"
+                                    sx={{
                                         color: 'text.primary',
                                         mb: 1,
                                         fontWeight: 600
@@ -261,9 +261,9 @@ export const Schedule = ({
                                 >
                                     No matches scheduled yet
                                 </Typography>
-                                <Typography 
-                                    variant="body2" 
-                                    sx={{ 
+                                <Typography
+                                    variant="body2"
+                                    sx={{
                                         color: 'text.secondary',
                                         maxWidth: '400px'
                                     }}
@@ -274,7 +274,7 @@ export const Schedule = ({
                         )}
                     </Box>
                 ) : (
-                    <PlayoffBracket 
+                    <PlayoffBracket
                         teams={teams}
                         matches={matches}
                         onMatchUpdate={onMatchUpdate}
@@ -291,4 +291,4 @@ export const Schedule = ({
             />
         </Box>
     );
-};
+}

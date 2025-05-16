@@ -1,4 +1,4 @@
-import { Box, Typography, Paper } from '@mui/material';
+import { Box, Typography, Paper, useTheme, useMediaQuery } from '@mui/material';
 import type { TeamStats } from '../../types';
 
 interface PointsTableProps {
@@ -6,12 +6,15 @@ interface PointsTableProps {
 }
 
 export const PointsTable = ({ stats }: PointsTableProps) => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     const cellStyle = {
-        padding: '16px',
+        padding: isMobile ? '8px 4px' : '16px',
         textAlign: 'center' as const,
         whiteSpace: 'nowrap' as const,
         color: '#1a1a1a',
-        fontSize: '0.875rem'
+        fontSize: isMobile ? '0.75rem' : '0.875rem'
     };
 
     const headerCellStyle = {
@@ -34,23 +37,24 @@ export const PointsTable = ({ stats }: PointsTableProps) => {
     };
 
     return (
-        <Box>
-            <Typography 
-                variant="h5" 
-                sx={{ 
+        <Box sx={{ width: '100%', overflow: 'hidden' }}>
+            <Typography
+                variant="h5"
+                sx={{
                     mb: 4,
                     fontWeight: 600,
                     color: '#001838',
                     textAlign: 'center',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.1em'
+                    letterSpacing: '0.1em',
+                    fontSize: isMobile ? '1.25rem' : '1.5rem'
                 }}
             >
                 Points Table
             </Typography>
-            <Paper 
-                sx={{ 
-                    overflowX: 'auto', 
+            <Paper
+                sx={{
+                    overflowX: 'auto',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                     borderRadius: 2,
                     '&::-webkit-scrollbar': {
@@ -65,22 +69,29 @@ export const PointsTable = ({ stats }: PointsTableProps) => {
                     }
                 }}
             >
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr>
-                            <th style={{ ...headerCellStyle, textAlign: 'left', minWidth: '200px' }}>Team</th>
-                            <th style={headerCellStyle}>P</th>
-                            <th style={headerCellStyle}>W</th>
-                            <th style={headerCellStyle}>L</th>
-                            <th style={headerCellStyle}>T</th>
-                            <th style={headerCellStyle}>Pts</th>
-                            <th style={headerCellStyle}>NRR</th>
-                            <th style={headerCellStyle}>Form</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <Box
+                    component="table"
+                    sx={{
+                        width: '100%',
+                        borderCollapse: 'collapse',
+                        minWidth: isMobile ? 'auto' : '800px'
+                    }}
+                >
+                    <Box component="thead">
+                        <Box component="tr">
+                            <Box component="th" sx={{ ...headerCellStyle, textAlign: 'left', minWidth: isMobile ? '120px' : '200px', paddingLeft: isMobile ? '8px' : '20px' }}>Team</Box>
+                            <Box component="th" sx={headerCellStyle}>P</Box>
+                            <Box component="th" sx={headerCellStyle}>W</Box>
+                            <Box component="th" sx={headerCellStyle}>L</Box>
+                            <Box component="th" sx={headerCellStyle}>T</Box>
+                            <Box component="th" sx={headerCellStyle}>Pts</Box>
+                            <Box component="th" sx={headerCellStyle}>NRR</Box>
+                            {!isMobile && <Box component="th" sx={headerCellStyle}>Form</Box>}
+                        </Box>
+                    </Box>
+                    <Box component="tbody">
                         {stats.map((stat, index) => (
-                            <Box 
+                            <Box
                                 component="tr"
                                 key={stat.team.id}
                                 sx={{
@@ -93,15 +104,15 @@ export const PointsTable = ({ stats }: PointsTableProps) => {
                                     }
                                 }}
                             >
-                                <td style={{ ...cellStyle, textAlign: 'left', paddingLeft: '20px' }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <Box component="td" sx={{ ...cellStyle, textAlign: 'left', paddingLeft: isMobile ? '8px' : '20px' }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? 1 : 2 }}>
                                         <Box
                                             component="img"
                                             src={stat.team.logo}
                                             alt={stat.team.name}
                                             sx={{
-                                                width: 40,
-                                                height: 40,
+                                                width: isMobile ? 32 : 40,
+                                                height: isMobile ? 32 : 40,
                                                 borderRadius: '50%',
                                                 border: '2px solid #e9ecef',
                                                 padding: '4px',
@@ -109,64 +120,70 @@ export const PointsTable = ({ stats }: PointsTableProps) => {
                                             }}
                                         />
                                         <Box>
-                                            <Typography 
-                                                sx={{ 
+                                            <Typography
+                                                sx={{
                                                     fontWeight: 600,
                                                     color: '#001838',
-                                                    fontSize: '0.9rem'
+                                                    fontSize: isMobile ? '0.8rem' : '0.9rem',
+                                                    maxWidth: isMobile ? '80px' : '160px',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap'
                                                 }}
                                             >
                                                 {stat.team.name}
                                             </Typography>
                                         </Box>
                                     </Box>
-                                </td>
-                                <td style={cellStyle}>{stat.matches}</td>
-                                <td style={cellStyle}>{stat.wins}</td>
-                                <td style={cellStyle}>{stat.losses}</td>
-                                <td style={cellStyle}>{stat.ties}</td>
-                                <td style={{ ...cellStyle, fontWeight: 600, color: '#001838' }}>{stat.points}</td>
-                                <td style={cellStyle}>{stat.nrr?.toFixed(3) || '0.000'}</td>
-                                <td style={cellStyle}>
-                                    <Box sx={{ 
-                                        display: 'flex', 
-                                        gap: 0.5, 
-                                        justifyContent: 'center',
-                                        '& > div': {
-                                            transition: 'transform 0.2s ease',
-                                            '&:hover': {
-                                                transform: 'scale(1.1)'
+                                </Box>
+                                <Box component="td" sx={cellStyle}>{stat.matches}</Box>
+                                <Box component="td" sx={cellStyle}>{stat.wins}</Box>
+                                <Box component="td" sx={cellStyle}>{stat.losses}</Box>
+                                <Box component="td" sx={cellStyle}>{stat.ties}</Box>
+                                <Box component="td" sx={{ ...cellStyle, fontWeight: 600, color: '#001838' }}>{stat.points}</Box>
+                                <Box component="td" sx={cellStyle}>{stat.nrr?.toFixed(3) || '0.000'}</Box>
+                                {!isMobile && (
+                                    <Box component="td" sx={cellStyle}>
+                                        <Box sx={{
+                                            display: 'flex',
+                                            gap: 0.5,
+                                            justifyContent: 'center',
+                                            '& > div': {
+                                                transition: 'transform 0.2s ease',
+                                                '&:hover': {
+                                                    transform: 'scale(1.1)'
+                                                }
                                             }
-                                        }
-                                    }}>
-                                        {stat.lastFive.map((result, i) => (
-                                            <Box
-                                                key={i}
-                                                sx={{
-                                                    width: 24,
-                                                    height: 24,
-                                                    borderRadius: '50%',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: 600,
-                                                    color: 'white',
-                                                    bgcolor: result === 'W' ? '#4CAF50' : 
+                                        }}>
+                                            {stat.lastFive?.map((result, i) => (
+                                                <Box
+                                                    key={i}
+                                                    sx={{
+                                                        width: 24,
+                                                        height: 24,
+                                                        borderRadius: '50%',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 600,
+                                                        color: 'white',
+                                                        bgcolor: result === 'W' ? '#4CAF50' :
                                                             result === 'L' ? '#f44336' : '#757575',
-                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                                }}
-                                            >
-                                                {result}
-                                            </Box>
-                                        ))}
+                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                    }}
+                                                >
+                                                    {result}
+                                                </Box>
+                                            ))}
+                                        </Box>
                                     </Box>
-                                </td>
+                                )}
                             </Box>
                         ))}
-                    </tbody>
-                </table>
+                    </Box>
+                </Box>
             </Paper>
         </Box>
     );
-}; 
+}

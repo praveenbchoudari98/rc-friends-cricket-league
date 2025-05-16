@@ -9,10 +9,16 @@ export default defineConfig({
   server: {
     port: 5175,
   },
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    sourcemap: false,
+    sourcemap: true,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         assetFileNames: 'assets/[name].[hash][extname]',
