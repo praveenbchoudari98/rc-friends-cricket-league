@@ -20,6 +20,7 @@ import type { Match, MatchResult, Team, MatchType, TournamentStage } from '../..
 import { MatchCard } from '../Matches/MatchCard';
 import { TournamentStartModal } from './TournamentStartModal';
 import { PlayoffBracket } from './PlayoffBracket';
+import { getSortedMatchData } from '../../utils/matchUtils';
 
 interface ScheduleProps {
     matches: Match[];
@@ -67,19 +68,15 @@ export const Schedule = ({
         const completedMatches = matches.filter(match => match.status === 'completed');
         const nonCompletedMatches = matches.filter(match => match.status !== 'completed');
 
-        // Sort completed matches by date and time in reverse chronological order
-        const sortedCompletedMatches = completedMatches.sort((a, b) => {
-            const dateA = a.date ? new Date(a.date) : new Date(0);
-            const dateB = b.date ? new Date(b.date) : new Date(0);
-            return dateB.getTime() - dateA.getTime(); // Most recent first
-        });
+        // Sort completed matches by timestamp in reverse chronological order
+        const sortedCompletedMatches = getSortedMatchData(completedMatches)
 
-        // Return sorted completed matches followed by non-completed matches
         return [...sortedCompletedMatches, ...nonCompletedMatches];
     };
 
+
     const leagueMatches = sortMatches(matches.filter(match => match.matchType === 'league'));
-    const playoffMatches = matches.filter(match => match.matchType !== 'league');
+    // const playoffMatches = matches.filter(match => match.matchType !== 'league');
 
     return (
         <Box sx={{
@@ -102,7 +99,7 @@ export const Schedule = ({
                 <Typography
                     variant="h4"
                     sx={{
-                        background: 'linear-gradient(45deg, #FF8C00, #FF1640)',
+                        background: 'linear-gradient(45deg, #FF8C00, #FF8C00)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         fontWeight: 700,
@@ -117,7 +114,7 @@ export const Schedule = ({
                         variant="contained"
                         onClick={() => setStartModalOpen(true)}
                         sx={{
-                            background: 'linear-gradient(45deg, #FF8C00, #FF1640)',
+                            background: 'linear-gradient(45deg, #FF8C00, #FF8C00)',
                             color: 'white',
                             fontWeight: 600,
                             px: 4,
@@ -125,7 +122,7 @@ export const Schedule = ({
                             borderRadius: '8px',
                             boxShadow: '0 4px 15px rgba(255, 140, 0, 0.2)',
                             '&:hover': {
-                                background: 'linear-gradient(45deg, #FF1640, #FF8C00)',
+                                background: 'linear-gradient(45deg, #FF8C00, #FF8C00)',
                                 transform: 'translateY(-2px)',
                                 boxShadow: '0 6px 20px rgba(255, 140, 0, 0.3)',
                             },
@@ -153,7 +150,7 @@ export const Schedule = ({
                     onChange={(_, newValue) => setSelectedTab(newValue)}
                     sx={{
                         '& .MuiTabs-indicator': {
-                            backgroundColor: '#FF1640',
+                            backgroundColor: '#FF8C00',
                             height: '3px',
                             borderRadius: '3px'
                         },
@@ -165,12 +162,12 @@ export const Schedule = ({
                             minHeight: '56px',
                             transition: 'all 0.3s ease',
                             '&.Mui-selected': {
-                                color: '#FF1640',
+                                color: '#FF8C00',
                                 fontWeight: 600
                             },
                             '&:hover': {
-                                color: '#FF1640',
-                                backgroundColor: alpha('#FF1640', 0.04)
+                                color: '#FF8C00',
+                                backgroundColor: alpha('#FF8C00', 0.04)
                             }
                         }
                     }}
@@ -188,7 +185,7 @@ export const Schedule = ({
                                 left: 0,
                                 right: 0,
                                 height: '3px',
-                                background: 'linear-gradient(45deg, #FF8C00, #FF1640)',
+                                background: 'linear-gradient(45deg, #FF8C00, #FF8C00)',
                                 opacity: 0.5,
                                 transition: 'opacity 0.3s ease'
                             } : {}
@@ -207,7 +204,7 @@ export const Schedule = ({
                                 left: 0,
                                 right: 0,
                                 height: '3px',
-                                background: 'linear-gradient(45deg, #FF8C00, #FF1640)',
+                                background: 'linear-gradient(45deg, #FF8C00, #FF8C00)',
                                 opacity: 0.5,
                                 transition: 'opacity 0.3s ease'
                             } : {}

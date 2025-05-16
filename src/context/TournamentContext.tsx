@@ -97,10 +97,10 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
                 id: generateUUID(),
                 logo: compressedLogo
             };
-            
+
             // Add team to Firebase
             await databaseService.addTeam(tournament.id, team);
-            
+
             setTournament((prev: Tournament) => ({
                 ...prev,
                 teams: [...prev.teams, team]
@@ -115,7 +115,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
         try {
             // Remove team from Firebase
             await databaseService.removeTeam(tournament.id, teamId);
-            
+
             setTournament((prev: Tournament) => ({
                 ...prev,
                 teams: prev.teams.filter((team: Team) => team.id !== teamId)
@@ -182,7 +182,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
     const handleUpdateMatch = async (updatedMatch: Match) => {
         try {
             await databaseService.updateMatch(tournament.id, updatedMatch);
-            
+
             const updatedTournament = {
                 ...tournament,
                 matches: tournament.matches.map((match: Match) =>
@@ -191,8 +191,9 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
             };
 
             if (updatedMatch.status === 'completed' || updatedMatch.status === 'tied') {
+                updatedTournament.matchesCompleted = tournament.matches.filter((m: Match) => m.status === 'completed' || m.status === 'tied').length + 1
                 const leagueMatches = updatedTournament.matches.filter((m: Match) => m.matchType === 'league');
-                const allLeagueMatchesCompleted = leagueMatches.every((m: Match) => 
+                const allLeagueMatchesCompleted = leagueMatches.every((m: Match) =>
                     m.status === 'completed' || m.status === 'tied'
                 );
 

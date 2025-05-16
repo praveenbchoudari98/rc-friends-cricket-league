@@ -74,6 +74,7 @@ export interface Tournament {
     name: string;
     teams: Team[];
     matches: Match[];
+    matchesCompleted: number;
     status: 'upcoming' | 'ongoing' | 'completed';
     currentStage: TournamentStage;
     pointsTable: TeamStats[];
@@ -108,4 +109,9 @@ export interface ScoreboardData {
 export interface TeamMapping {
     screenTeamName: string;
     actualTeam: Team;
-} 
+}
+
+export interface FirestoreDocument {
+    id: string;             // The document ID
+    [key: string]: any;     // All other fields from the document
+}

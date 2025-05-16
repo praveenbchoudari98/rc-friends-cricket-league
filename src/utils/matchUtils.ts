@@ -52,3 +52,17 @@ export const getFormattedDate = (matchDate: Date): string => {
     const formattedDate = format(istDate, 'dd MMM yyyy');
     return formattedDate
 }
+
+const toMillis = (date: any): number => {
+    if (!date) return 0;
+    if (date instanceof Date) return date.getTime();
+    if (typeof date.seconds === 'number') {
+        return date.seconds * 1000 + Math.floor((date.nanoseconds || 0) / 1_000_000);
+    }
+    return new Date(date).getTime(); // fallback, in case it's a string
+};
+export const getSortedMatchData = (matches: Match[]): Match[] => {
+    return matches.sort((a, b) => {
+        return toMillis(b.date) - toMillis(a.date); // Most recent first
+    });
+}

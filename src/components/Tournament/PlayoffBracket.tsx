@@ -132,7 +132,7 @@ export const PlayoffBracket = ({
 
         return (
             <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, color: '#FF1640', fontWeight: 600 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, color: '#FF8C00', fontWeight: 600 }}>
                     Super Duper Over{matches.length > 1 ? 's' : ''}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -146,7 +146,7 @@ export const PlayoffBracket = ({
                                         top: -8,
                                         left: '50%',
                                         transform: 'translateX(-50%)',
-                                        bgcolor: '#FF1640',
+                                        bgcolor: '#FF8C00',
                                         color: 'white',
                                         px: 1,
                                         py: 0.25,

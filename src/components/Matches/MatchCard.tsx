@@ -26,6 +26,7 @@ import { format } from 'date-fns';
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
 import { getFormattedDate, getVictoryMargin } from '../../utils/matchUtils';
+import { useTournamentContext } from '../../context/TournamentContext';
 
 interface MatchCardProps {
     match: Match;
@@ -122,6 +123,7 @@ export const MatchCard = ({
     shouldOpenUpdateDialog = false
 }: MatchCardProps) => {
     const navigate = useNavigate();
+    const { tournament } = useTournamentContext();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isScreenshotDialogOpen, setIsScreenshotDialogOpen] = useState(false);
     const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(false);
@@ -200,13 +202,16 @@ export const MatchCard = ({
 
             const updatedMatch: Match = {
                 ...match,
+                matchNumber: Number(tournament.matchesCompleted ?? 0) + 1,
                 status: 'completed',
+                date: new Date(`${matchDate} ${matchTime}`),
                 inningsInfo: {
                     tossWinner: tossWinner!,
                     tossDecision: tossDecision as TossDecision,
                     battingFirst,
                     date: matchDate || new Date(), // Preserve original match date if it exists
                     time: matchTime // Use the selected match time
+
                 },
                 result: {
                     winner,
@@ -558,7 +563,7 @@ export const MatchCard = ({
                             {venue}
                         </Typography>
                     </Box>
-                    {!isCompleted && !isProduction && (
+                    {!isCompleted && !readOnly && !isProduction && (
                         <Tooltip title="Upload Scoreboard Screenshot" arrow>
                             <IconButton
                                 size="small"
@@ -677,7 +682,7 @@ export const MatchCard = ({
                                 onClick={handleOpenDialog}
                                 sx={{
                                     color: '#fff',
-                                    bgcolor: '#FF1640',
+                                    bgcolor: '#FF8C00',
                                     textTransform: 'none',
                                     fontSize: '0.875rem',
                                     fontWeight: 600,
@@ -875,7 +880,7 @@ export const MatchCard = ({
                                     textAlign: 'center'
                                 }}>
                                     {match.venue || 'Wankhede Stadium, Mumbai'}<br />
-                                    {getFormattedDate(match.date ||  new Date())}<br />
+                                    {getFormattedDate(match.date || new Date())}<br />
                                     {match.time || format(new Date(), 'h:mm a')} IST
                                 </Typography>
                             </Box>
@@ -958,7 +963,7 @@ export const MatchCard = ({
                                     position: 'absolute',
                                     top: 16,
                                     right: 16,
-                                    bgcolor: '#FF1640',
+                                    bgcolor: '#FF8C00',
                                     color: 'white',
                                     '&:hover': {
                                         bgcolor: '#E31236'

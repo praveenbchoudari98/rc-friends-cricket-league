@@ -217,7 +217,7 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                 inningsInfo: {
                     ...match.inningsInfo!,  // Keep existing toss winner and decision
                     date: match.inningsInfo!.date,
-                    time: match.inningsInfo!.time
+                    time: match.inningsInfo!.time,
                 },
                 result: {
                     team1Score,

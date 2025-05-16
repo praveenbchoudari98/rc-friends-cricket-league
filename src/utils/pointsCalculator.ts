@@ -1,4 +1,5 @@
 import type { Match, Team, TeamStats } from '../types';
+import { getSortedMatchData } from './matchUtils';
 
 const POINTS_FOR_WIN = 2;
 const POINTS_FOR_LOSS = 0;
@@ -18,7 +19,7 @@ export const calculateTeamStats = (team: Team, matches: Match[]): TeamStats => {
     let oversBowled = 0;
     let lastFive: ('W' | 'L' | 'T')[] = [];
 
-    teamMatches.forEach(match => {
+    getSortedMatchData(teamMatches).forEach(match => {
         const result = match.result;
         if (!result) return;
 
@@ -53,7 +54,7 @@ export const calculateTeamStats = (team: Team, matches: Match[]): TeamStats => {
 
     // Calculate Net Run Rate
     // For tied matches, the NRR impact is neutral (0)
-    const netRunRate = oversPlayed > 0 && oversBowled > 0 ? 
+    const netRunRate = oversPlayed > 0 && oversBowled > 0 ?
         (runsScored / oversPlayed) - (runsConceded / oversBowled) : 0;
 
     return {
@@ -74,6 +75,7 @@ export const calculateTeamStats = (team: Team, matches: Match[]): TeamStats => {
 
 export function generatePointsTable(teams: Team[], matches: Match[]): TeamStats[] {
     const stats = new Map<string, TeamStats>();
+    const sortedmatches = getSortedMatchData(matches)
 
     // Initialize stats for all teams
     teams.forEach(team => {
@@ -94,10 +96,10 @@ export function generatePointsTable(teams: Team[], matches: Match[]): TeamStats[
     });
 
     // Calculate stats from completed matches
-    matches.filter(match => 
-        match.status === 'completed' && 
-        match.result && 
-        stats.has(match.team1.id) && 
+    sortedmatches.filter(match =>
+        match.status === 'completed' &&
+        match.result &&
+        stats.has(match.team1.id) &&
         stats.has(match.team2.id)
     ).forEach(match => {
         const team1Stats = stats.get(match.team1.id)!;

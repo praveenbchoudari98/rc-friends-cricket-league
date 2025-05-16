@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Typography, Paper, useTheme } from '@mui/material';
 import type { TeamStats } from '../../types';
 
 interface PointsTableProps {
@@ -7,7 +7,6 @@ interface PointsTableProps {
 
 export const PointsTable = ({ stats }: PointsTableProps) => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const cellStyle = {
         padding: '16px',
@@ -121,7 +120,7 @@ export const PointsTable = ({ stats }: PointsTableProps) => {
                                     <Box component="th" sx={headerCellStyle}>T</Box>
                                     <Box component="th" sx={headerCellStyle}>Pts</Box>
                                     <Box component="th" sx={headerCellStyle}>NRR</Box>
-                                    <Box component="th" sx={{ ...headerCellStyle, minWidth: '150px' }}>Form</Box>
+                                    <Box component="th" sx={{ ...headerCellStyle, minWidth: '150px' }}>Recent Form</Box>
                                 </Box>
                             </Box>
                             <Box component="tbody">
