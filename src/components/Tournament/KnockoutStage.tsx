@@ -1,6 +1,16 @@
 import React from 'react';
-import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, Paper } from '@mui/material';
-import { EmojiEvents as TrophyIcon, EmojiEvents as QualifierIcon, Stars as FinalIcon } from '@mui/icons-material';
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, Paper, Avatar } from '@mui/material';
+import { 
+    EmojiEvents as TrophyIcon, 
+    EmojiEvents as QualifierIcon, 
+    Stars as FinalIcon, 
+    QuestionMark as QuestionMarkIcon,
+    Looks as SecondIcon,
+    Filter3 as ThirdIcon,
+    LooksOne as FirstIcon,
+    SportsKabaddi as VersusIcon,
+    Pending as QualifierWinnerIcon
+} from '@mui/icons-material';
 import { Celebration as CelebrationIcon } from '@mui/icons-material';
 import type { Match, Team, TeamStats, MatchType, MatchStatus, TournamentStage } from '../../types';
 import { TeamCard } from './TeamCard';
@@ -13,7 +23,12 @@ interface KnockoutStageProps {
     currentStage: TournamentStage;
 }
 
-export const KnockoutStage: React.FC<KnockoutStageProps> = ({ matches, pointsTable, onMatchUpdate, currentStage }) => {
+export const KnockoutStage: React.FC<KnockoutStageProps> = ({ 
+    matches, 
+    pointsTable, 
+    onMatchUpdate, 
+    currentStage 
+}: KnockoutStageProps) => {
     // Add animation trigger state
     const [animate, setAnimate] = React.useState(false);
 
@@ -23,55 +38,83 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({ matches, pointsTab
         return () => clearTimeout(timer);
     }, []);
 
+    // Check if all league matches are completed
+    const leagueMatches = matches.filter((m: Match) => m.matchType === 'league');
+    const allLeagueMatchesCompleted = leagueMatches.length > 0 && 
+        leagueMatches.every((m: Match) => m.status === 'completed' || m.status === 'tied');
+
     const getQualificationText = (matchType: MatchType, teamIndex: 1 | 2): string => {
-        if (!pointsTable || pointsTable.length === 0) return '';
+        if (!pointsTable || pointsTable.length === 0 || !allLeagueMatchesCompleted) return 'TBD';
         
         if (matchType === ('qualifier' as MatchType)) {
             if (teamIndex === 1) {
                 const team = pointsTable[1]?.team;
-                return team ? `${team.name} (2nd in Points)` : '(2nd in Points)';
+                return team ? `${team.name}` : '2nd Position';
             } else {
                 const team = pointsTable[2]?.team;
-                return team ? `${team.name} (3rd in Points)` : '(3rd in Points)';
+                return team ? `${team.name}` : '3rd Position';
             }
         } else if (matchType === 'final') {
             if (teamIndex === 1) {
                 const team = pointsTable[0]?.team;
-                return team ? `${team.name} (1st in Points)` : '(1st in Points)';
+                return team ? `${team.name}` : '1st Position';
             }
-            return '(Qualifier Winner)';
+            return 'Qualifier Winner';
         }
-        return '';
+        return 'TBD';
     };
+
+    // Create a data URL for the TBD avatar
+    const tbdAvatarUrl = React.useMemo(() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 100;
+        canvas.height = 100;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            // Draw circle background
+            ctx.fillStyle = '#EEEEEE';
+            ctx.beginPath();
+            ctx.arc(50, 50, 45, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw question mark
+            ctx.fillStyle = '#999999';
+            ctx.font = 'bold 60px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('?', 50, 50);
+        }
+        return canvas.toDataURL();
+    }, []);
 
     // Create placeholder matches if they don't exist
     const placeholderTeam: Team = {
         id: 'tbd',
         name: 'TBD',
-        logo: 'https://via.placeholder.com/150'
+        logo: tbdAvatarUrl
     };
 
     // Get teams based on points table positions
     const getTeamByPosition = (position: number): Team => {
-        if (pointsTable && pointsTable.length > position) {
+        if (allLeagueMatchesCompleted && pointsTable && pointsTable.length > position) {
             return pointsTable[position].team;
         }
         return placeholderTeam;
     };
 
     // Get playoff matches
-    const qualifierMatch = matches.find(m => m.matchType === ('qualifier' as MatchType)) || {
+    const qualifierMatch = matches.find((m: Match) => m.matchType === ('qualifier' as MatchType)) || {
         id: 'placeholder-qualifier',
-        team1: pointsTable[1]?.team,
-        team2: pointsTable[2]?.team,
+        team1: allLeagueMatchesCompleted ? pointsTable[1]?.team : placeholderTeam,
+        team2: allLeagueMatchesCompleted ? pointsTable[2]?.team : placeholderTeam,
         matchType: 'qualifier' as MatchType,
         status: 'scheduled' as MatchStatus,
         venue: 'TBD'
     } as Match;
     
-    const finalMatch = matches.find(m => m.matchType === 'final') || {
+    const finalMatch = matches.find((m: Match) => m.matchType === 'final') || {
         id: 'placeholder-final',
-        team1: pointsTable[0]?.team, // 1st place team
+        team1: allLeagueMatchesCompleted ? pointsTable[0]?.team : placeholderTeam,
         team2: placeholderTeam, // Will be qualifier winner
         matchType: 'final',
         status: 'scheduled',
@@ -80,22 +123,22 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({ matches, pointsTab
     
     // Get super duper over matches
     const qualifierSuperDuperOvers = matches
-        .filter(m => m.matchType === 'super_duper_over' && m.parentMatchId === qualifierMatch.id)
-        .sort((a, b) => (a.date?.getTime() || 0) - (b.date?.getTime() || 0));
+        .filter((m: Match) => m.matchType === 'super_duper_over' && m.parentMatchId === qualifierMatch.id)
+        .sort((a: Match, b: Match) => (a.date?.getTime() || 0) - (b.date?.getTime() || 0));
 
     const finalSuperDuperOvers = matches
-        .filter(m => m.matchType === 'super_duper_over' && m.parentMatchId === finalMatch.id)
-        .sort((a, b) => (a.date?.getTime() || 0) - (b.date?.getTime() || 0));
+        .filter((m: Match) => m.matchType === 'super_duper_over' && m.parentMatchId === finalMatch.id)
+        .sort((a: Match, b: Match) => (a.date?.getTime() || 0) - (b.date?.getTime() || 0));
 
     // Filter matches for display
-    const displayMatches = matches.filter(m => 
+    const displayMatches = matches.filter((m: Match) => 
         m.matchType === ('qualifier' as MatchType) || 
         m.matchType === 'final' || 
         m.matchType === 'super_duper_over'
     );
     
     const winner = finalMatch?.result?.winner || finalSuperDuperOvers[finalSuperDuperOvers.length - 1]?.result?.winner;
-    const finalMatchTied = finalMatch?.status === 'tied' && !finalSuperDuperOvers.find(m => m.result?.winner);
+    const finalMatchTied = finalMatch?.status === 'tied' && !finalSuperDuperOvers.find((m: Match) => m.result?.winner);
     const tournamentComplete = Boolean(winner);
 
     const formatDate = (date?: Date | string) => {
@@ -215,15 +258,90 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({ matches, pointsTab
                 </Typography>
             </Box>
 
+            {/* Team Position Indicators */}
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                px: 2,
+                mb: 1
+            }}>
+                <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 1,
+                    color: matchType === 'qualifier' ? '#FF8C00' : '#FFD700'
+                }}>
+                    {matchType === 'qualifier' ? (
+                        <>
+                            <SecondIcon />
+                            <Typography variant="body2" fontWeight="600">
+                                2nd Position
+                            </Typography>
+                        </>
+                    ) : (
+                        <>
+                            <FirstIcon />
+                            <Typography variant="body2" fontWeight="600">
+                                1st Position
+                            </Typography>
+                        </>
+                    )}
+                </Box>
+                <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    color: matchType === 'qualifier' ? '#FF8C00' : '#FFD700',
+                    mx: 2
+                }}>
+                    <VersusIcon sx={{ 
+                        fontSize: '24px',
+                        animation: 'pulse 1.5s infinite',
+                        '@keyframes pulse': {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.2)' }
+                        }
+                    }} />
+                </Box>
+                <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 1,
+                    color: matchType === 'qualifier' ? '#FF8C00' : '#FFD700'
+                }}>
+                    {matchType === 'qualifier' ? (
+                        <>
+                            <ThirdIcon />
+                            <Typography variant="body2" fontWeight="600">
+                                3rd Position
+                            </Typography>
+                        </>
+                    ) : (
+                        <>
+                            <QualifierWinnerIcon sx={{ 
+                                animation: 'spin 2s linear infinite',
+                                '@keyframes spin': {
+                                    '0%': { transform: 'rotate(0deg)' },
+                                    '100%': { transform: 'rotate(360deg)' }
+                                }
+                            }} />
+                            <Typography variant="body2" fontWeight="600">
+                                Qualifier Winner
+                            </Typography>
+                        </>
+                    )}
+                </Box>
+            </Box>
+
             {/* Parent Match */}
-                {match && (
-                    <MatchCardComponent 
-                        match={match}
-                        onUpdate={handleUpdate}
-                        currentStage={currentStage}
-                        readOnly={true}
-                    />
-                )}
+            {match && (
+                <MatchCardComponent 
+                    match={match}
+                    onUpdate={handleUpdate}
+                    currentStage={currentStage}
+                    readOnly={true}
+                />
+            )}
 
             {/* Super Duper Over Matches */}
             {superDuperOvers.length > 0 && (
@@ -244,7 +362,7 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({ matches, pointsTab
                         borderRadius: '4px'
                     }
                 }}>
-                    {superDuperOvers.map((superDuperOver, index) => (
+                    {superDuperOvers.map((superDuperOver: Match, index: number) => (
                         <Box 
                             key={superDuperOver.id}
                             sx={{

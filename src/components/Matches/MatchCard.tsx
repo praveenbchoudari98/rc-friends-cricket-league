@@ -25,7 +25,7 @@ import { ScoreboardUploader } from '../ScoreboardUploader';
 import { format } from 'date-fns';
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
-import { getVictoryMargin } from '../../utils/matchUtils';
+import { getFormattedDate, getVictoryMargin } from '../../utils/matchUtils';
 
 interface MatchCardProps {
     match: Match;
@@ -53,8 +53,8 @@ interface ScoresState {
 }
 
 const TeamScore = ({ team, score, isCompleted }: TeamScoreProps) => (
-    <Box sx={{ 
-        display: 'flex', 
+    <Box sx={{
+        display: 'flex',
         alignItems: 'center',
         gap: 2,
         width: '100%'
@@ -63,16 +63,16 @@ const TeamScore = ({ team, score, isCompleted }: TeamScoreProps) => (
             component="img"
             src={team.logo}
             alt={team.name}
-            sx={{ 
+            sx={{
                 width: 36,
                 height: 36,
                 objectFit: 'contain'
             }}
         />
         <Box sx={{ flex: 1 }}>
-            <Typography 
-                variant="subtitle1" 
-                sx={{ 
+            <Typography
+                variant="subtitle1"
+                sx={{
                     fontWeight: 500,
                     color: '#1A1A1A',
                     fontSize: '0.875rem',
@@ -82,9 +82,9 @@ const TeamScore = ({ team, score, isCompleted }: TeamScoreProps) => (
                 {team.name}
             </Typography>
             {isCompleted && score && (
-                <Typography 
-                    variant="body1" 
-                    sx={{ 
+                <Typography
+                    variant="body1"
+                    sx={{
                         fontWeight: 600,
                         color: '#1A1A1A',
                         fontSize: '0.875rem',
@@ -93,9 +93,9 @@ const TeamScore = ({ team, score, isCompleted }: TeamScoreProps) => (
                     }}
                 >
                     {score.runs}/{score.wickets}
-                    <Typography 
-                        component="span" 
-                        sx={{ 
+                    <Typography
+                        component="span"
+                        sx={{
                             ml: 0.5,
                             color: '#666666',
                             fontSize: '0.85rem'
@@ -109,11 +109,14 @@ const TeamScore = ({ team, score, isCompleted }: TeamScoreProps) => (
     </Box>
 );
 
-export const MatchCard = ({ 
-    match, 
+// Environment check for production
+const isProduction = process.env.NODE_ENV === 'production';
+
+export const MatchCard = ({
+    match,
     onUpdate = () => {
         console.warn('No onUpdate handler provided to MatchCard component');
-    }, 
+    },
     currentStage,
     readOnly = false,
     shouldOpenUpdateDialog = false
@@ -160,7 +163,7 @@ export const MatchCard = ({
         if (currentStep === 1 && (!tossWinner || !tossDecision)) {
             alert('Please select toss winner and decision');
             return;
-            }
+        }
         setCurrentStep(prev => Math.min(prev + 1, 3));
     };
 
@@ -170,71 +173,51 @@ export const MatchCard = ({
 
     const handleSubmit = () => {
         try {
-        if (!tossWinner || !tossDecision) {
-            alert('Please select toss winner and decision');
-            return;
-        }
+            const team1Score: Score = {
+                runs: parseInt(scores.team1.runs.toString()) || 0,
+                wickets: parseInt(scores.team1.wickets.toString()) || 0,
+                overs: parseFloat(scores.team1.overs.toString()) || 0
+            };
 
-        // Validate that all score fields are filled
-        const team1Scores = scores.team1;
-        const team2Scores = scores.team2;
-        if (
-            team1Scores.runs === '' || team1Scores.wickets === '' || team1Scores.overs === '' ||
-            team2Scores.runs === '' || team2Scores.wickets === '' || team2Scores.overs === ''
-        ) {
-            alert('Please fill in all score fields');
-            return;
-        }
+            const team2Score: Score = {
+                runs: parseInt(scores.team2.runs.toString()) || 0,
+                wickets: parseInt(scores.team2.wickets.toString()) || 0,
+                overs: parseFloat(scores.team2.overs.toString()) || 0
+            };
 
-        const battingFirst = tossDecision === 'bat' ? tossWinner : 
-            (tossWinner.id === match.team1.id ? match.team2 : match.team1);
+            let result: 'win' | 'tie' = 'win';
+            let winner: Team | undefined;
 
-        const team1Score: Score = {
-            runs: Number(scores.team1.runs),
-            wickets: Number(scores.team1.wickets),
-            overs: Number(scores.team1.overs)
-        };
-        const team2Score: Score = {
-            runs: Number(scores.team2.runs),
-            wickets: Number(scores.team2.wickets),
-            overs: Number(scores.team2.overs)
-        };
-        
-        let result: MatchOutcome;
-        let winner: Team | undefined;
-        
-        // Check for tie
-        if (team1Score.runs === team2Score.runs) {
-            console.log('Match is tied:', team1Score.runs, team2Score.runs);
-            result = 'tie';
-            winner = undefined;
-        } else {
-            console.log('Match has a winner:', team1Score.runs, team2Score.runs);
-            result = 'win';
-            winner = team1Score.runs > team2Score.runs ? match.team1 : match.team2;
-        }
-
-        const updatedMatch: Match = {
-            ...match,
-                venue: 'Wankhede Stadium, Mumbai',
-                status: 'completed',
-            inningsInfo: {
-                tossWinner,
-                tossDecision,
-                battingFirst,
-                    date: new Date(),
-                    time: new Date().toLocaleTimeString()
-            },
-            result: {
-                winner,
-                team1Score,
-                team2Score,
-                result
+            if (team1Score.runs === team2Score.runs) {
+                result = 'tie';
+                winner = undefined;
+            } else {
+                winner = team1Score.runs > team2Score.runs ? match.team1 : match.team2;
             }
-        };
 
-        onUpdate(updatedMatch);
-        handleCloseDialog();
+            // Determine batting first team based on toss winner and decision
+            const battingFirst = tossDecision === 'bat' ? tossWinner! : (tossWinner === match.team1 ? match.team2 : match.team1);
+
+            const updatedMatch: Match = {
+                ...match,
+                status: 'completed',
+                inningsInfo: {
+                    tossWinner: tossWinner!,
+                    tossDecision: tossDecision as TossDecision,
+                    battingFirst,
+                    date: matchDate || new Date(), // Preserve original match date if it exists
+                    time: matchTime // Use the selected match time
+                },
+                result: {
+                    winner,
+                    team1Score,
+                    team2Score,
+                    result
+                }
+            };
+
+            onUpdate(updatedMatch);
+            handleCloseDialog();
         } catch (error) {
             console.error('Error updating match:', error);
             alert('An error occurred while updating the match. Please try again.');
@@ -245,7 +228,7 @@ export const MatchCard = ({
         const numValue = parseFloat(value);
         if (isNaN(numValue)) return '';
         if (numValue < 0) return 0;
-        
+
         // For super duper overs, limit to 2 overs
         const maxOvers = match.matchType === 'super_duper_over' ? 2 : 20;
         if (numValue > maxOvers) {
@@ -255,7 +238,7 @@ export const MatchCard = ({
             }
             return maxOvers;
         }
-        
+
         const integerPart = Math.floor(numValue);
         const decimalPart = numValue % 1;
         if (decimalPart >= 0.6) {
@@ -342,9 +325,9 @@ export const MatchCard = ({
                     fullWidth
                     placeholder="Enter overs"
                     InputLabelProps={{ shrink: true, children: "Overs" }}
-                    inputProps={{ 
-                        min: 0, 
-                        max: match.matchType === 'super_duper_over' ? 2 : 20, 
+                    inputProps={{
+                        min: 0,
+                        max: match.matchType === 'super_duper_over' ? 2 : 20,
                         step: 0.1,
                         'data-testid': 'overs-input'
                     }}
@@ -377,14 +360,14 @@ export const MatchCard = ({
             // Determine the result type and winner
             const team1Score = matchData.result.team1Score;
             const team2Score = matchData.result.team2Score;
-            
+
             if (!team1Score || !team2Score) {
                 throw new Error('Missing score data for one or both teams');
             }
 
             let result: MatchOutcome;
             let winner: Team | undefined;
-            
+
             // Check for tie
             if (team1Score.runs === team2Score.runs) {
                 result = 'tie';
@@ -479,15 +462,15 @@ export const MatchCard = ({
                                         label="Toss Winner"
                                         data-testid="toss-winner-select"
                                     >
-                                        <MenuItem 
-                                            value={match.team1.id} 
+                                        <MenuItem
+                                            value={match.team1.id}
                                             role="option"
                                             data-testid="toss-winner-team1-option"
                                         >
                                             {match.team1.name}
                                         </MenuItem>
-                                        <MenuItem 
-                                            value={match.team2.id} 
+                                        <MenuItem
+                                            value={match.team2.id}
                                             role="option"
                                             data-testid="toss-winner-team2-option"
                                         >
@@ -503,15 +486,15 @@ export const MatchCard = ({
                                         label="Toss Decision"
                                         data-testid="toss-decision-select"
                                     >
-                                        <MenuItem 
-                                            value="bat" 
+                                        <MenuItem
+                                            value="bat"
                                             role="option"
                                             data-testid="toss-decision-bat-option"
                                         >
                                             Bat
                                         </MenuItem>
-                                        <MenuItem 
-                                            value="bowl" 
+                                        <MenuItem
+                                            value="bowl"
                                             role="option"
                                             data-testid="toss-decision-bowl-option"
                                         >
@@ -544,8 +527,8 @@ export const MatchCard = ({
 
     return (
         <>
-            <Card 
-                sx={{ 
+            <Card
+                sx={{
                     mb: 2,
                     borderRadius: 0,
                     overflow: 'hidden',
@@ -557,34 +540,34 @@ export const MatchCard = ({
                 }}
             >
                 {/* Match Info Header */}
-                        <Box sx={{
+                <Box sx={{
                     display: 'flex',
-                                    alignItems: 'center',
-                            gap: 2,
+                    alignItems: 'center',
+                    gap: 2,
                     p: '12px 16px',
                     borderBottom: '1px solid #E5E5E5',
                     bgcolor: '#FFFFFF'
                 }}>
                     <Box sx={{ flex: 1 }}>
-                                    <Typography variant="body2" sx={{ 
-                            color: '#1A1A1A', 
-                                        fontWeight: 500,
+                        <Typography variant="body2" sx={{
+                            color: '#1A1A1A',
+                            fontWeight: 500,
                             fontSize: '0.875rem',
                             lineHeight: 1.2
                         }}>
                             {venue}
-                            </Typography>
+                        </Typography>
                     </Box>
-                    {!readOnly && (
+                    {!isCompleted && !isProduction && (
                         <Tooltip title="Upload Scoreboard Screenshot" arrow>
                             <IconButton
                                 size="small"
                                 onClick={handleScreenshotDialogOpen}
-                                sx={{ 
+                                sx={{
                                     color: '#666666',
                                     padding: '6px',
-                    '&:hover': {
-                                        backgroundColor: 'rgba(0,0,0,0.04)' 
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(0,0,0,0.04)'
                                     }
                                 }}
                             >
@@ -592,63 +575,63 @@ export const MatchCard = ({
                             </IconButton>
                         </Tooltip>
                     )}
-                    </Box>
+                </Box>
 
-                <CardContent sx={{ 
+                <CardContent sx={{
                     p: '16px',
                     '&:last-child': { pb: '16px' }
                 }}>
                     {/* Match Result (if completed) */}
                     {isCompleted && match.result?.winner && (
-                            <Typography 
-                            variant="body2" 
-                    sx={{ 
+                        <Typography
+                            variant="body2"
+                            sx={{
                                 mb: 2,
                                 fontWeight: 600,
                                 color: '#1A1A1A',
                                 fontSize: '0.875rem',
                                 lineHeight: 1.2
-                    }}
-                >
+                            }}
+                        >
                             {match.result.winner.name} {getVictoryMargin(match).toUpperCase()}
-                            </Typography>
+                        </Typography>
                     )}
                     {isCompleted && match.result?.result === 'tie' && (
-                            <Typography 
-                                variant="body2" 
-                        sx={{
-                            mb: 2,
-                            fontWeight: 600,
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                mb: 2,
+                                fontWeight: 600,
                                 color: '#1A1A1A'
-                                }}
-                            >
+                            }}
+                        >
                             MATCH TIED
                         </Typography>
-                        )}
+                    )}
 
                     {/* Teams */}
                     <Box sx={{
-                            display: 'flex',
+                        display: 'flex',
                         flexDirection: 'column',
                         gap: 2.5
                     }}>
-                        <TeamScore 
-                            team={match.team1} 
+                        <TeamScore
+                            team={match.team1}
                             score={match.result?.team1Score}
                             isCompleted={isCompleted}
                         />
-                        <TeamScore 
-                            team={match.team2} 
+                        <TeamScore
+                            team={match.team2}
                             score={match.result?.team2Score}
                             isCompleted={isCompleted}
                         />
                     </Box>
 
                     {/* Action Buttons */}
-                        <Box sx={{
+                    <Box sx={{
                         mt: 2,
-                                    display: 'flex', 
-                            justifyContent: 'center',
+                        display: 'flex',
+                        justifyContent: 'center',
                         gap: 2
                     }}>
                         {isCompleted ? (
@@ -656,7 +639,7 @@ export const MatchCard = ({
                                 variant="outlined"
                                 size="small"
                                 onClick={() => navigate(`/match/${match.id}`)}
-                                sx={{ 
+                                sx={{
                                     color: '#fff',
                                     bgcolor: '#4CAF50',
                                     textTransform: 'none',
@@ -690,14 +673,14 @@ export const MatchCard = ({
                         ) : !readOnly && (
                             <Button
                                 variant="outlined"
-                        size="small"
+                                size="small"
                                 onClick={handleOpenDialog}
-                        sx={{
+                                sx={{
                                     color: '#fff',
                                     bgcolor: '#FF1640',
                                     textTransform: 'none',
                                     fontSize: '0.875rem',
-                            fontWeight: 600,
+                                    fontWeight: 600,
                                     padding: '8px 32px',
                                     minWidth: '140px',
                                     borderRadius: '0',
@@ -719,23 +702,23 @@ export const MatchCard = ({
                                         transform: 'skew(-12deg) translateY(0)',
                                         boxShadow: '0 2px 4px rgba(255, 22, 64, 0.2)',
                                     }
-                        }}
+                                }}
                             >
                                 <span>Add Score</span>
                             </Button>
                         )}
-                            </Box>
+                    </Box>
                 </CardContent>
             </Card>
 
             {/* Score Dialog */}
-            <Dialog 
-                open={isDialogOpen} 
+            <Dialog
+                open={isDialogOpen}
                 onClose={handleCloseDialog}
                 maxWidth="sm"
                 fullWidth
                 keepMounted={false}
-                sx={{ 
+                sx={{
                     '& .MuiBackdrop-root': {
                         backgroundColor: 'rgba(0, 0, 0, 0.5)'
                     },
@@ -764,14 +747,14 @@ export const MatchCard = ({
                     ) : (
                         <Button onClick={handleSubmit} variant="contained" color="primary">
                             Save
-                    </Button>
+                        </Button>
                     )}
                 </DialogActions>
             </Dialog>
 
             {/* Screenshot Upload Dialog */}
-            <Dialog 
-                open={isScreenshotDialogOpen} 
+            <Dialog
+                open={isScreenshotDialogOpen}
                 onClose={handleScreenshotDialogClose}
                 maxWidth="md"
                 fullWidth
@@ -807,7 +790,7 @@ export const MatchCard = ({
                 }}
             >
                 <DialogContent sx={{ p: 0, height: '100%', position: 'relative' }}>
-                    <Box sx={{ 
+                    <Box sx={{
                         width: '100%',
                         height: '100%',
                         display: 'flex',
@@ -817,34 +800,34 @@ export const MatchCard = ({
                         pt: 4
                     }}>
                         {/* Team Scores Section */}
-                    <Box sx={{
+                        <Box sx={{
                             width: '100%',
-                        display: 'flex',
+                            display: 'flex',
                             justifyContent: 'center',
-                        alignItems: 'center',
+                            alignItems: 'center',
                             gap: 8,
                             mb: 4
-                    }}>
-                        {/* Team 1 */}
-                        <Box sx={{
-                                    display: 'flex', 
-                                flexDirection: 'column',
-                                    alignItems: 'center',
-                                gap: 2
                         }}>
-                            <Box
-                                component="img"
-                                src={match.team1.logo}
-                                alt={match.team1.name}
-                                sx={{
+                            {/* Team 1 */}
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: 2
+                            }}>
+                                <Box
+                                    component="img"
+                                    src={match.team1.logo}
+                                    alt={match.team1.name}
+                                    sx={{
                                         width: 120,
                                         height: 120,
                                         objectFit: 'contain'
-                                }}
-                            />
+                                    }}
+                                />
                                 {match.result?.team1Score && (
                                     <Box sx={{ textAlign: 'center' }}>
-                                        <Typography 
+                                        <Typography
                                             variant="h3"
                                             sx={{
                                                 color: 'white',
@@ -853,9 +836,9 @@ export const MatchCard = ({
                                                 lineHeight: 1
                                             }}
                                         >
-                                        {match.result.team1Score.runs}/{match.result.team1Score.wickets}
+                                            {match.result.team1Score.runs}/{match.result.team1Score.wickets}
                                         </Typography>
-                                        <Typography 
+                                        <Typography
                                             sx={{
                                                 color: '#ffffff99',
                                                 fontSize: '1.25rem',
@@ -863,13 +846,13 @@ export const MatchCard = ({
                                             }}
                                         >
                                             {match.result.team1Score.overs} Overs
-                            </Typography>
+                                        </Typography>
                                     </Box>
-                        )}
-                        </Box>
+                                )}
+                            </Box>
 
                             {/* Match Info */}
-                        <Box sx={{
+                            <Box sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
@@ -879,70 +862,70 @@ export const MatchCard = ({
                                     bgcolor: '#ffffff',
                                     color: '#1a2d7d',
                                     py: 0.75,
-                            px: 2,
+                                    px: 2,
                                     borderRadius: '4px',
                                     fontWeight: 600,
                                     fontSize: '0.875rem'
                                 }}>
                                     MATCH {match.matchNumber || 1}
                                 </Box>
-                                <Typography sx={{ 
+                                <Typography sx={{
                                     color: '#ffffff99',
                                     fontSize: '1rem',
                                     textAlign: 'center'
                                 }}>
-                                    {match.venue || 'Eden Gardens, Kolkata'}<br/>
-                                    {format(new Date(match.date || new Date()), 'dd MMM yyyy')}<br/>
+                                    {match.venue || 'Wankhede Stadium, Mumbai'}<br />
+                                    {getFormattedDate(match.date ||  new Date())}<br />
                                     {match.time || format(new Date(), 'h:mm a')} IST
-                            </Typography>
-                    </Box>
+                                </Typography>
+                            </Box>
 
                             {/* Team 2 */}
-                        <Box sx={{
-                            display: 'flex',
+                            <Box sx={{
+                                display: 'flex',
                                 flexDirection: 'column',
-                            alignItems: 'center',
+                                alignItems: 'center',
                                 gap: 2
-                        }}>
-                            <Box
-                                component="img"
-                                src={match.team2.logo}
-                                alt={match.team2.name}
-                                sx={{
+                            }}>
+                                <Box
+                                    component="img"
+                                    src={match.team2.logo}
+                                    alt={match.team2.name}
+                                    sx={{
                                         width: 120,
                                         height: 120,
                                         objectFit: 'contain'
-                                }}
-                            />
+                                    }}
+                                />
                                 {match.result?.team2Score && (
                                     <Box sx={{ textAlign: 'center' }}>
-                        <Typography 
+                                        <Typography
                                             variant="h3"
-                            sx={{ 
+                                            sx={{
                                                 color: 'white',
                                                 fontSize: '3.5rem',
                                                 fontWeight: 700,
                                                 lineHeight: 1
-                            }}
-                        >
+                                            }}
+                                        >
                                             {match.result.team2Score.runs}/{match.result.team2Score.wickets}
-                        </Typography>
-                            <Typography 
-                                sx={{ 
+                                        </Typography>
+                                        <Typography
+                                            sx={{
                                                 color: '#ffffff99',
                                                 fontSize: '1.25rem',
                                                 mt: 1
-                                }}
-                            >
+                                            }}
+                                        >
                                             {match.result.team2Score.overs} Overs
-                            </Typography>
+                                        </Typography>
                                     </Box>
-                        )}
+                                )}
                             </Box>
-                    </Box>
+                        </Box>
 
                         {/* Result Section */}
-                        <Box sx={{ 
+                        <Box sx={{
                             width: '100%',
                             bgcolor: '#1e367c',
                             py: 2,
@@ -950,18 +933,18 @@ export const MatchCard = ({
                             justifyContent: 'center',
                             alignItems: 'center'
                         }}>
-                            <Typography 
+                            <Typography
                                 sx={{
                                     color: 'white',
                                     fontSize: '1.5rem',
                                     fontWeight: 500
                                 }}
                             >
-                                {match.result?.result === 'tie' ? 'Match Tied' : 
+                                {match.result?.result === 'tie' ? 'Match Tied' :
                                     match.result?.winner && `${match.result.winner.name} ${getVictoryMargin(match)}`
                                 }
                             </Typography>
-                    </Box>
+                        </Box>
 
                         {/* Update Score Button */}
                         {!readOnly && (
@@ -971,31 +954,31 @@ export const MatchCard = ({
                                     setIsDialogOpen(true);
                                     setIsSummaryDialogOpen(false);
                                 }}
-                            sx={{ 
+                                sx={{
                                     position: 'absolute',
                                     top: 16,
                                     right: 16,
                                     bgcolor: '#FF1640',
-                    color: 'white',
-                                '&:hover': {
+                                    color: 'white',
+                                    '&:hover': {
                                         bgcolor: '#E31236'
-                                }
-                            }}
-                        >
+                                    }
+                                }}
+                            >
                                 Update Score
-                        </Button>
-                    )}
+                            </Button>
+                        )}
 
                         {/* Close Button */}
                         <IconButton
                             onClick={handleSummaryClose}
-                        sx={{
+                            sx={{
                                 position: 'absolute',
                                 top: 16,
                                 left: 16,
                                 color: 'white'
-                        }}
-                    >
+                            }}
+                        >
                             <CloseIcon />
                         </IconButton>
                     </Box>

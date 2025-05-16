@@ -3,6 +3,9 @@ import { Button, Box, FormControl, Select, MenuItem, Typography, Paper, Circular
 import { Team, ScoreboardData, TeamMapping, Match } from '../types';
 import Tesseract from 'tesseract.js';
 
+// Environment check for production
+const isProduction = process.env.NODE_ENV === 'production';
+
 interface Props {
     teams: Team[];
     onScoreSubmit: (matchData: Partial<Match>) => void;
@@ -16,6 +19,11 @@ interface ExtractedTeamScore {
 }
 
 export const ScoreboardUploader: React.FC<Props> = ({ teams, onScoreSubmit }) => {
+    // If in production, return null to hide the component
+    if (isProduction) {
+        return null;
+    }
+
     const [isProcessing, setIsProcessing] = useState(false);
     const [screenshot, setScreenshot] = useState<string | null>(null);
     const [extractedData, setExtractedData] = useState<ScoreboardData | null>(null);

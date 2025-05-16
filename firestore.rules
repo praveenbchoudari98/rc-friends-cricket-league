@@ -2,10 +2,17 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /tournaments/{tournamentId} {
-      allow read, write: if true;  // For development only
+      // Allow read access to tournament documents
+      allow read: if true;
       
+      // Allow write operations with basic validation
+      allow write: if request.resource.data.keys().hasAll(['id', 'name', 'teams', 'matches', 'status', 'currentStage'])
+                  && request.resource.data.status in ['upcoming', 'ongoing', 'completed']
+                  && request.resource.data.currentStage in ['league', 'qualifier', 'final'];
+      
+      // Allow access to nested collections
       match /{document=**} {
-        allow read, write: if true;  // Allow access to nested collections
+        allow read, write: if true;
       }
     }
   }

@@ -15,7 +15,7 @@ import {
     useTheme,
     alpha
 } from '@mui/material';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import type { Match, MatchResult, Team, MatchType, TournamentStage } from '../../types';
 import { MatchCard } from '../Matches/MatchCard';
 import { TournamentStartModal } from './TournamentStartModal';
@@ -62,7 +62,23 @@ export const Schedule = ({
         setIsVisible(true);
     }, []);
 
-    const leagueMatches = matches.filter(match => match.matchType === 'league');
+    const sortMatches = (matches: Match[]) => {
+        // Separate completed and non-completed matches
+        const completedMatches = matches.filter(match => match.status === 'completed');
+        const nonCompletedMatches = matches.filter(match => match.status !== 'completed');
+
+        // Sort completed matches by date and time in reverse chronological order
+        const sortedCompletedMatches = completedMatches.sort((a, b) => {
+            const dateA = a.date ? new Date(a.date) : new Date(0);
+            const dateB = b.date ? new Date(b.date) : new Date(0);
+            return dateB.getTime() - dateA.getTime(); // Most recent first
+        });
+
+        // Return sorted completed matches followed by non-completed matches
+        return [...sortedCompletedMatches, ...nonCompletedMatches];
+    };
+
+    const leagueMatches = sortMatches(matches.filter(match => match.matchType === 'league'));
     const playoffMatches = matches.filter(match => match.matchType !== 'league');
 
     return (

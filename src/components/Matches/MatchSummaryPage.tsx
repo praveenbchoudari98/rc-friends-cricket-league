@@ -11,7 +11,7 @@ import {
     TextField,
     Stack
 } from '@mui/material';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import type { Match, Score, Team } from '../../types';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
@@ -22,6 +22,31 @@ interface MatchSummaryPageProps {
     match: Match;
     onUpdateScores?: (updatedMatch: Match) => void;
 }
+
+const formatDate = (dateStr?: string | Date) => {
+    if (!dateStr) return format(new Date(), 'dd MMM yyyy');
+    try {
+        const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+        return isValid(date) ? format(date, 'dd MMM yyyy') : format(new Date(), 'dd MMM yyyy');
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return format(new Date(), 'dd MMM yyyy');
+    }
+};
+
+const formatTime = (timeStr?: string) => {
+    if (!timeStr) return format(new Date(), 'h:mm a');
+    try {
+        // Create a date object with the time string
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const date = new Date();
+        date.setHours(hours, minutes);
+        return isValid(date) ? format(date, 'h:mm a') : format(new Date(), 'h:mm a');
+    } catch (error) {
+        console.error('Error formatting time:', error);
+        return format(new Date(), 'h:mm a');
+    }
+};
 
 export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProps) => {
     const navigate = useNavigate();
@@ -215,6 +240,7 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
     const { team1, team2 } = match;
     const { team1Score, team2Score } = match.result;
     const { tossWinner, tossDecision, battingFirst, date, time } = match.inningsInfo;
+    console.log(match,"matchsummary")
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: '#1a2d7d' }}>
@@ -340,10 +366,10 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                             {match.venue || 'Wankhede Stadium, Mumbai'}
                         </Typography>
                         <Typography variant="body2" sx={{ mb: 0.5 }}>
-                            {format(new Date(date), 'dd MMM yyyy')}
+                            {formatDate(date)}
                         </Typography>
                         <Typography variant="body2">
-                            {format(new Date(`2000-01-01 ${time}`), 'h:mm a')} IST
+                            {formatTime(time)} IST
                         </Typography>
                     </Box>
 

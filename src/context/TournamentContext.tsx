@@ -5,6 +5,7 @@ import { generateLeagueSchedule } from '../utils/scheduleGenerator';
 import { generatePointsTable } from '../utils/pointsCalculator';
 import { compressImage } from '../utils/imageCompression';
 import { databaseService } from '../services/databaseService';
+import { generateUUID } from '../utils/uuid';
 
 export interface TournamentContextType {
     tournament: Tournament;
@@ -23,7 +24,7 @@ const TournamentContext = createContext<TournamentContextType | undefined>(undef
 
 export function TournamentProvider({ children }: { children: React.ReactNode }) {
     const [tournament, setTournament] = useState<Tournament>(() => ({
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         name: "RC FRIENDS CRICKET LEAGUE 25",
         teams: [],
         matches: [],
@@ -36,33 +37,64 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
     }));
 
     const [error, setError] = useState<string | null>(null);
+    const [isInitialized, setIsInitialized] = useState(false);
 
-    // Load initial tournament data from Firebase
+    // Load or create initial tournament data
     useEffect(() => {
-        const loadTournament = async () => {
+        const initializeTournament = async () => {
             try {
                 const tournaments = await databaseService.getAllTournaments();
                 if (tournaments.length > 0) {
-                    setTournament(tournaments[0]);
+                    // Update points table for existing tournament
+                    const existingTournament = tournaments[0];
+                    existingTournament.pointsTable = generatePointsTable(existingTournament.teams, existingTournament.matches);
+                    setTournament(existingTournament);
                 } else {
                     // Create initial tournament in Firebase
-                    await databaseService.saveTournament(tournament);
+                    const newTournament: Tournament = {
+                        id: generateUUID(),
+                        name: "RC FRIENDS CRICKET LEAGUE 25",
+                        teams: [],
+                        matches: [],
+                        status: 'upcoming',
+                        currentStage: 'league',
+                        pointsTable: [],
+                        config: {
+                            matchesPerTeamPair: 1
+                        }
+                    };
+                    await databaseService.saveTournament(newTournament);
+                    setTournament(newTournament);
                 }
+                setIsInitialized(true);
             } catch (error) {
-                console.error('Error loading tournament:', error);
-                setError('Failed to load tournament data');
+                console.error('Error initializing tournament:', error);
+                setError('Failed to initialize tournament data');
             }
         };
 
-        loadTournament();
+        initializeTournament();
     }, []);
+
+    // Update points table whenever matches or teams change
+    useEffect(() => {
+        if (tournament.teams.length > 0 && tournament.matches.length > 0) {
+            const updatedPointsTable = generatePointsTable(tournament.teams, tournament.matches);
+            if (JSON.stringify(updatedPointsTable) !== JSON.stringify(tournament.pointsTable)) {
+                setTournament((prev: Tournament) => ({
+                    ...prev,
+                    pointsTable: updatedPointsTable
+                }));
+            }
+        }
+    }, [tournament.teams, tournament.matches]);
 
     const handleAddTeam = async (newTeam: { name: string; logo: string }) => {
         try {
             const compressedLogo = await compressImage(newTeam.logo);
             const team: Team = {
                 ...newTeam,
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 logo: compressedLogo
             };
             
@@ -122,7 +154,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
 
     const handleCreatePlayoffMatch = async (team1: Team, team2: Team, matchType: MatchType) => {
         const newMatch: Match = {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             team1,
             team2,
             matchType,
