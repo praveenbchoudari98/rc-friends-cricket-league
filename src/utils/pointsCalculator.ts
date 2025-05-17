@@ -132,8 +132,8 @@ export function generatePointsTable(teams: Team[], matches: Match[]): TeamStats[
         }
 
         // Keep only last 5 matches
-        team1Stats.lastFive = team1Stats.lastFive.slice(-5);
-        team2Stats.lastFive = team2Stats.lastFive.slice(-5);
+        team1Stats.lastFive = team1Stats.lastFive.slice(0, 5)
+        team2Stats.lastFive = team2Stats.lastFive.slice(0, 5);
 
         // Update runs and overs for NRR calculation
         team1Stats.runsScored += match.result!.team1Score.runs;
