@@ -11,6 +11,8 @@ import {
   Button,
   useTheme,
   useMediaQuery,
+  Avatar,
+  Stack,
 } from "@mui/material";
 import Slider from "react-slick";
 import { motion } from "framer-motion";
@@ -23,6 +25,7 @@ import MIRC24 from "../assets/images/MIRC24.webp";
 import RC24 from "../assets/images/RC24.jpg";
 import RCControl from "../assets/images/RCControls.webp";
 import { useTournamentContext } from "../context/TournamentContext";
+import { log } from "console";
 
 const carouselImages = [RC24, MIRC24, RCControl];
 
@@ -88,6 +91,23 @@ const HomePage: React.FC = () => {
     { label: "Runs Recorded", value: 58200 },
     { label: "Wickets Tracked", value: 1140 },
   ]);
+  const [liveMatchInfo, setLiveMatchInfo] = React.useState({
+    team1: {
+      name: '',
+      runs: '',
+      wickets: '',
+      overs: '',
+      logo: ''
+    },
+    team2: {
+      runs: '',
+      wickets: '',
+      overs: '',
+      name: '',
+      logo: ''
+    }
+  }
+  )
 
   const { tournament } = useTournamentContext();
 
@@ -103,13 +123,29 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     if (tournament.pointsTable.length !== 0) {
       const { pointsTable, matchesCompleted } = tournament;
-
+      const recentMatch = tournament.matches.filter(match => match.status === "completed")[0];
       let runsScored = 0;
       let wicketsTaken = 0;
       pointsTable.forEach(team => {
         runsScored += team.runsScored;
         wicketsTaken += team.wicketsTaken;
       });
+      setLiveMatchInfo({
+        team1: {
+          name: recentMatch.team1.name,
+          runs: recentMatch.result?.team1Score.runs,
+          wickets: recentMatch.result?.team1Score.wickets,
+          overs: recentMatch.result?.team1Score.overs,
+          logo: recentMatch.team1.logo
+        },
+        team2: {
+          name: recentMatch.team2.name,
+          runs: recentMatch.result?.team2Score.runs,
+          wickets: recentMatch.result?.team2Score.wickets,
+          overs: recentMatch.result?.team2Score.overs,
+          logo: recentMatch.team2.logo
+        }
+      })
       setStats([
         { label: "Matches Covered", value: matchesCompleted },
         { label: "Runs Recorded", value: runsScored },
@@ -197,20 +233,72 @@ const HomePage: React.FC = () => {
         >
           A unified platform for live cricket scores, global coverage, analytics, and cricket passion.
         </Typography>
-
         <Paper
           elevation={3}
           sx={{
-            mt: { xs: 3, md: 5 },
-            p: { xs: 2, md: 4 },
-            borderRadius: 3,
-            backgroundImage: "url('/images/cricket-bg.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            color: "#fff",
+            p: 2,
+            borderRadius: 2,
+            width: '100%',
+            mx: 'auto',
+            maxWidth: '100%',
           }}
         >
-          <Typography variant={isMobile ? "h6" : "h5"}>🏏 Live Match: PC vs SK</Typography>
+          <Stack
+            direction={isMobile ? 'column' : 'row'}
+            alignItems="center"
+            justifyContent="center"
+            spacing={isMobile ? 1 : 2}
+            flexWrap="wrap"
+          >
+            {/* Title */}
+            <Typography
+              variant="h6"
+              fontWeight="bold"
+              sx={{ color: '#e53935', textAlign: isMobile ? 'center' : 'left' }}
+            >
+              🏏 Live Match:
+            </Typography>
+
+            {/* Team 1 */}
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="h6" fontWeight="bold">
+                {liveMatchInfo.team1.name}
+              </Typography>
+              <Avatar
+                src={liveMatchInfo.team1.logo}
+                alt="Team1 Logo"
+                sx={{ width: 24, height: 24 }}
+              />
+              <Typography fontSize="1rem" fontWeight="medium">
+                {liveMatchInfo.team1.runs}/{liveMatchInfo.team1.wickets}
+              </Typography>
+            </Box>
+
+            {/* VS */}
+            <Typography
+              variant="h6"
+              fontWeight="medium"
+              color="text.secondary"
+              sx={{ mx: isMobile ? 0 : 1 }}
+            >
+              vs
+            </Typography>
+
+            {/* Team 2 */}
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="h6" fontWeight="bold">
+                {liveMatchInfo.team2.name}
+              </Typography>
+              <Avatar
+                src={liveMatchInfo.team2.logo}
+                alt="Team2 Logo"
+                sx={{ width: 24, height: 24 }}
+              />
+              <Typography fontSize="1rem" fontWeight="medium">
+                {liveMatchInfo.team2.runs}/{liveMatchInfo.team2.wickets}
+              </Typography>
+            </Box>
+          </Stack>
         </Paper>
 
         <Typography variant={isMobile ? "h6" : "h5"} sx={{ mt: 6, mb: 3 }}>

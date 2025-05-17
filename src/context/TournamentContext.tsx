@@ -6,6 +6,7 @@ import { generatePointsTable } from '../utils/pointsCalculator';
 import { compressImage } from '../utils/imageCompression';
 import { databaseService } from '../services/databaseService';
 import { generateUUID } from '../utils/uuid';
+import { getSortedMatchData } from '../utils/matchUtils';
 
 export interface TournamentContextType {
     tournament: Tournament;
@@ -178,16 +179,26 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
             setError('Failed to create playoff match. Please try again.');
         }
     };
+    const sortMatches = (matches: Match[]) => {
+        // Separate completed and non-completed matches
+        const completedMatches = matches.filter(match => match.status === 'completed');
+        const nonCompletedMatches = matches.filter(match => match.status !== 'completed');
+
+        // Sort completed matches by timestamp in reverse chronological order
+        const sortedCompletedMatches = getSortedMatchData(completedMatches)
+
+        return [...sortedCompletedMatches, ...nonCompletedMatches];
+    };
 
     const handleUpdateMatch = async (updatedMatch: Match) => {
         try {
             await databaseService.updateMatch(tournament.id, updatedMatch);
-
-            const updatedTournament = {
-                ...tournament,
-                matches: tournament.matches.map((match: Match) =>
+            const updatedMatches = tournament.matches.map((match: Match) =>
                     match.id === updatedMatch.id ? updatedMatch : match
                 )
+            const updatedTournament = {
+                ...tournament,
+                matches: sortMatches(updatedMatches),
             };
 
             if (updatedMatch.status === 'completed' || updatedMatch.status === 'tied') {

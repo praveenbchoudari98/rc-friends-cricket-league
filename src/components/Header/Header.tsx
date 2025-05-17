@@ -45,7 +45,7 @@ export function Header() {
     };
 
     const handleLogoClick = () => {
-        navigate('/schedule');
+        navigate('/');
     };
 
     return (

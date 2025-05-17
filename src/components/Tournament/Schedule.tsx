@@ -63,19 +63,8 @@ export const Schedule = ({
         setIsVisible(true);
     }, []);
 
-    const sortMatches = (matches: Match[]) => {
-        // Separate completed and non-completed matches
-        const completedMatches = matches.filter(match => match.status === 'completed');
-        const nonCompletedMatches = matches.filter(match => match.status !== 'completed');
 
-        // Sort completed matches by timestamp in reverse chronological order
-        const sortedCompletedMatches = getSortedMatchData(completedMatches)
-
-        return [...sortedCompletedMatches, ...nonCompletedMatches];
-    };
-
-
-    const leagueMatches = sortMatches(matches.filter(match => match.matchType === 'league'));
+    const leagueMatches = matches.filter(match => match.matchType === 'league');
     // const playoffMatches = matches.filter(match => match.matchType !== 'league');
 
     return (
