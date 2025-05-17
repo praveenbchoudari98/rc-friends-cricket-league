@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   Container,
@@ -22,6 +22,7 @@ import Bat from '../assets/images/bat.webp'
 import MIRC24 from "../assets/images/MIRC24.webp";
 import RC24 from "../assets/images/RC24.jpg";
 import RCControl from "../assets/images/RCControls.webp";
+import { useTournamentContext } from "../context/TournamentContext";
 
 const carouselImages = [RC24, MIRC24, RCControl];
 
@@ -49,19 +50,13 @@ const features = [
   },
 ];
 
-const stats = [
-  { label: "Matches Covered", value: 342 },
-  { label: "Runs Recorded", value: "58,200+" },
-  { label: "Wickets Tracked", value: 1140 },
-];
-
 const floatingItems = [
   { icon: "🏏", label: "Bat", size: 60, initialX: 2, initialY: 20, delay: 0 },
   { icon: "🥎", label: "Ball", size: 55, initialX: 90, initialY: 35, delay: 1 },
   { icon: "🧤", label: "Gloves", size: 50, initialX: 45, initialY: 60, delay: 2 },
   { icon: "🎽", label: "Jersey", size: 65, initialX: 80, initialY: 80, delay: 1.5 },
   { icon: "🥎", label: "Ball", size: 55, initialX: 1, initialY: 40, delay: 1 },
-  
+
 ];
 
 const floatAnimation = {
@@ -88,6 +83,13 @@ const HomePage: React.FC = () => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [stats, setStats] = React.useState([
+    { label: "Matches Covered", value: 342 },
+    { label: "Runs Recorded", value: 58200 },
+    { label: "Wickets Tracked", value: 1140 },
+  ]);
+
+  const { tournament } = useTournamentContext();
 
   const sliderSettings = {
     dots: true,
@@ -98,7 +100,23 @@ const HomePage: React.FC = () => {
     autoplay: true,
     autoplaySpeed: 4500,
   };
+  useEffect(() => {
+    if (tournament.pointsTable.length !== 0) {
+      const { pointsTable, matchesCompleted } = tournament;
 
+      let runsScored = 0;
+      let wicketsTaken = 0;
+      pointsTable.forEach(team => {
+        runsScored += team.runsScored;
+        wicketsTaken += team.wicketsTaken;
+      });
+      setStats([
+        { label: "Matches Covered", value: matchesCompleted },
+        { label: "Runs Recorded", value: runsScored },
+        { label: "Wickets Tracked", value: wicketsTaken },
+      ])
+    }
+  }, [tournament]);
   return (
     <>
       {floatingItems.map(({ icon, label, size, initialX, initialY, delay }, i) => (

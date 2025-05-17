@@ -67,6 +67,7 @@ export interface TeamStats {
     runsConceded: number;
     oversPlayed: number;
     oversBowled: number;
+    wicketsTaken: number;
 }
 
 export interface Tournament {

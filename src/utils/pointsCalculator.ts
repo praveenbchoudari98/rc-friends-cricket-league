@@ -91,7 +91,8 @@ export function generatePointsTable(teams: Team[], matches: Match[]): TeamStats[
             runsScored: 0,
             runsConceded: 0,
             oversPlayed: 0,
-            oversBowled: 0
+            oversBowled: 0,
+            wicketsTaken: 0
         });
     });
 
@@ -140,11 +141,13 @@ export function generatePointsTable(teams: Team[], matches: Match[]): TeamStats[
         team1Stats.runsConceded += match.result!.team2Score.runs;
         team1Stats.oversPlayed += match.result!.team1Score.overs;
         team1Stats.oversBowled += match.result!.team2Score.overs;
+        team1Stats.wicketsTaken += match.result!.team2Score.wickets;
 
         team2Stats.runsScored += match.result!.team2Score.runs;
         team2Stats.runsConceded += match.result!.team1Score.runs;
         team2Stats.oversPlayed += match.result!.team2Score.overs;
         team2Stats.oversBowled += match.result!.team1Score.overs;
+        team2Stats.wicketsTaken += match.result!.team1Score.wickets;
     });
 
     // Calculate NRR for each team
