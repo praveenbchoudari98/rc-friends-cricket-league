@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-    AppBar, 
-    Toolbar, 
-    Typography, 
-    Box, 
-    Tabs, 
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Box,
+    Tabs,
     Tab,
     IconButton,
     Drawer,
@@ -19,7 +19,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 
 const routes = [
-    {path:"/",label:"Home"},
+    { path: "/", label: "Home" },
     { path: '/teams', label: 'Teams' },
     { path: '/schedule', label: 'Schedule' },
     { path: '/points-table', label: 'Points Table' },
@@ -49,27 +49,27 @@ export function Header() {
     };
 
     return (
-        <AppBar 
-            position="fixed" 
-            sx={{ 
+        <AppBar
+            position="fixed"
+            sx={{
                 zIndex: (theme) => theme.zIndex.drawer + 1,
                 background: 'linear-gradient(135deg, #001838 0%, #002147 100%)',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
             }}
         >
-            <Toolbar 
-                sx={{ 
-                    display: 'flex', 
+            <Toolbar
+                sx={{
+                    display: 'flex',
                     gap: 2,
                     minHeight: '72px !important',
                     py: 1,
                     justifyContent: 'space-between'
                 }}
             >
-                <Box 
-                    sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: 2,
                         minWidth: 'fit-content',
                         flex: { xs: 1, md: 'unset' },
@@ -77,7 +77,7 @@ export function Header() {
                     }}
                     onClick={handleLogoClick}
                 >
-                    <Box 
+                    <Box
                         component="img"
                         src={logo}
                         alt="RFCL25 Logo"
@@ -91,8 +91,8 @@ export function Header() {
                             }
                         }}
                     />
-                    <Box 
-                        sx={{ 
+                    <Box
+                        sx={{
                             position: 'relative',
                             padding: '0.5rem 0',
                             '&::before': {
@@ -124,9 +124,9 @@ export function Header() {
                             }
                         }}
                     >
-                        <Typography 
-                            variant="h6" 
-                            sx={{ 
+                        <Typography
+                            variant="h6"
+                            sx={{
                                 fontFamily: "'Playfair Display', serif",
                                 fontStyle: 'italic',
                                 fontWeight: 700,
@@ -148,9 +148,9 @@ export function Header() {
                         >
                             RC Friends
                         </Typography>
-                        <Typography 
-                            variant="subtitle1" 
-                            sx={{ 
+                        <Typography
+                            variant="subtitle1"
+                            sx={{
                                 fontFamily: "'Cormorant Garamond', serif",
                                 fontStyle: 'italic',
                                 fontWeight: 500,
@@ -178,8 +178,8 @@ export function Header() {
 
                 {!isMobile && (
                     <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                        <Tabs 
-                            value={currentTab} 
+                        <Tabs
+                            value={currentTab}
                             onChange={handleTabChange}
                             textColor="inherit"
                             sx={{
@@ -197,10 +197,10 @@ export function Header() {
                             }}
                         >
                             {routes.map((route) => (
-                                <Tab 
+                                <Tab
                                     key={route.path}
                                     label={route.label}
-                                    sx={{ 
+                                    sx={{
                                         minWidth: 120,
                                         px: 2,
                                         fontWeight: 500
@@ -236,36 +236,39 @@ export function Header() {
                         sx: {
                             width: 240,
                             background: 'linear-gradient(135deg, #001838 0%, #002147 100%)',
-                            color: 'white'
+                            color: 'white',
+                            marginTop:'64px'
                         }
                     }}
                 >
                     <List sx={{ pt: 2 }}>
-                        {routes.map((route) => (
-                            <ListItem
-                                key={route.path}
-                                onClick={() => handleMobileMenuClick(route.path)}
-                                sx={{
-                                    py: 2,
-                                    borderLeft: route.path === location.pathname ? '4px solid #FF8C00' : '4px solid transparent',
-                                    backgroundColor: route.path === location.pathname ? 'rgba(255, 140, 0, 0.1)' : 'transparent',
-                                    '&:hover': {
-                                        backgroundColor: 'rgba(255, 140, 0, 0.1)',
-                                        cursor: 'pointer'
-                                    }
-                                }}
-                            >
-                                <ListItemText 
-                                    primary={route.label}
+                        {routes.map((route) => {
+                            return (
+                                <ListItem
+                                    key={route.path}
+                                    onClick={() => (route.path)}
                                     sx={{
-                                        '& .MuiListItemText-primary': {
-                                            color: route.path === location.pathname ? '#FF8C00' : 'white',
-                                            fontWeight: route.path === location.pathname ? 600 : 400
+                                        py: 2,
+                                        borderLeft: route.path === location.pathname ? '4px solid #FF8C00' : '4px solid transparent',
+                                        backgroundColor: route.path === location.pathname ? 'rgba(255, 140, 0, 0.1)' : 'transparent',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(255, 140, 0, 0.1)',
+                                            cursor: 'pointer'
                                         }
                                     }}
-                                />
-                            </ListItem>
-                        ))}
+                                >
+                                    <ListItemText
+                                        primary={route.label}
+                                        sx={{
+                                            '& .MuiListItemText-primary': {
+                                                color: route.path === location.pathname ? '#FF8C00' : 'white',
+                                                fontWeight: route.path === location.pathname ? 600 : 400
+                                            }
+                                        }}
+                                    />
+                                </ListItem>
+                            )
+                        })}
                     </List>
                 </Drawer>
             </Toolbar>
