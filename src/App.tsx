@@ -8,6 +8,10 @@ import PointsTableView from './routes/PointsTableView';
 import KnockoutView from './routes/KnockoutView';
 import AboutView from './routes/AboutView';
 import MatchSummaryView from './routes/MatchSummaryView';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import HomePage from './routes/Homepage';
+
 
 // Theme configuration
 const theme = createTheme({
@@ -152,7 +156,8 @@ function App() {
                 <Header />
                 <Container maxWidth={false} sx={{ flex: 1, pt: { xs: '60px', md: '80px' }, px: { xs: 2, sm: 3, md: 4 } }}>
                     <Routes>
-                        <Route index element={<TeamsView />} />
+                        <Route index element={<HomePage />} />
+                        <Route path="teams" element={<TeamsView/>}/>
                         <Route path="schedule" element={<ScheduleView />} />
                         <Route path="points-table" element={<PointsTableView />} />
                         <Route path="knockout" element={<KnockoutView />} />

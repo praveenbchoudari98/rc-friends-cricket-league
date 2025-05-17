@@ -19,7 +19,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 
 const routes = [
-    { path: '/', label: 'Teams' },
+    {path:"/",label:"Home"},
+    { path: '/teams', label: 'Teams' },
     { path: '/schedule', label: 'Schedule' },
     { path: '/points-table', label: 'Points Table' },
     { path: '/knockout', label: 'Knockout' },
