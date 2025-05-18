@@ -10,11 +10,7 @@ export default function KnockoutView() {
     return (
         <Box sx={{ minHeight: 'calc(100vh - 180px)' }}>
             <KnockoutStage 
-                matches={tournament.matches.filter(m => 
-                    m.matchType === ('qualifier' as MatchType) || 
-                    m.matchType === 'final' ||
-                    m.matchType === 'super_duper_over'
-                )}
+                matches={tournament.matches}
                 pointsTable={tournament.pointsTable}
                 onMatchUpdate={handleUpdateMatch}
                 currentStage={tournament.currentStage}

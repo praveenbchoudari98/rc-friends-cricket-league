@@ -25,7 +25,6 @@ import MIRC24 from "../assets/images/MIRC24.webp";
 import RC24 from "../assets/images/RC24.jpg";
 import RCControl from "../assets/images/RCControls.webp";
 import { useTournamentContext } from "../context/TournamentContext";
-import { log } from "console";
 
 const carouselImages = [RC24, MIRC24, RCControl];
 
@@ -105,7 +104,8 @@ const HomePage: React.FC = () => {
       overs: '',
       name: '',
       logo: ''
-    }
+    },
+    matchType: ''
   }
   )
 
@@ -144,7 +144,8 @@ const HomePage: React.FC = () => {
           wickets: recentMatch.result?.team2Score.wickets,
           overs: recentMatch.result?.team2Score.overs,
           logo: recentMatch.team2.logo
-        }
+        },
+        matchType: recentMatch.matchType
       })
       setStats([
         { label: "Matches Covered", value: matchesCompleted },
@@ -266,9 +267,10 @@ const HomePage: React.FC = () => {
             <Typography
               variant="h6"
               fontWeight="bold"
+              textTransform={'capitalize'}
               sx={{ color: '#e53935', textAlign: isMobile ? 'center' : 'left' }}
             >
-              🏏 Live Match:
+              🏏 Live {liveMatchInfo.matchType} Match:
             </Typography>
 
             {/* Team 1 */}

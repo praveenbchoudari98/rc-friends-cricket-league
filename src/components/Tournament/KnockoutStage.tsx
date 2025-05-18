@@ -1,10 +1,9 @@
 import React from 'react';
-import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, Paper, Avatar } from '@mui/material';
+import { Box, Typography} from '@mui/material';
 import { 
     EmojiEvents as TrophyIcon, 
     EmojiEvents as QualifierIcon, 
     Stars as FinalIcon, 
-    QuestionMark as QuestionMarkIcon,
     Looks as SecondIcon,
     Filter3 as ThirdIcon,
     LooksOne as FirstIcon,
@@ -13,7 +12,6 @@ import {
 } from '@mui/icons-material';
 import { Celebration as CelebrationIcon } from '@mui/icons-material';
 import type { Match, Team, TeamStats, MatchType, MatchStatus, TournamentStage } from '../../types';
-import { TeamCard } from './TeamCard';
 import { MatchCard as MatchCardComponent } from '../Matches/MatchCard';
 
 interface KnockoutStageProps {
@@ -41,8 +39,8 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
     // Check if all league matches are completed
     const leagueMatches = matches.filter((m: Match) => m.matchType === 'league');
     const allLeagueMatchesCompleted = leagueMatches.length > 0 && 
-        leagueMatches.every((m: Match) => m.status === 'completed' || m.status === 'tied');
-
+    leagueMatches.every((m: Match) => m.status === 'completed' || m.status === 'tied');
+    
     const getQualificationText = (matchType: MatchType, teamIndex: 1 | 2): string => {
         if (!pointsTable || pointsTable.length === 0 || !allLeagueMatchesCompleted) return 'TBD';
         
