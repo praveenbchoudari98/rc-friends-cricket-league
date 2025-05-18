@@ -194,15 +194,15 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
         try {
             await databaseService.updateMatch(tournament.id, updatedMatch);
             const updatedMatches = tournament.matches.map((match: Match) =>
-                    match.id === updatedMatch.id ? updatedMatch : match
-                )
+                match.id === updatedMatch.id ? updatedMatch : match
+            )
             const updatedTournament = {
                 ...tournament,
                 matches: sortMatches(updatedMatches),
             };
 
             if (updatedMatch.status === 'completed' || updatedMatch.status === 'tied') {
-                updatedTournament.matchesCompleted = tournament.matches.filter((m: Match) => m.status === 'completed' || m.status === 'tied').length + 1
+                updatedTournament.matchesCompleted = updatedMatches.filter((m: Match) => m.status === 'completed' || m.status === 'tied').length;
                 const leagueMatches = updatedTournament.matches.filter((m: Match) => m.matchType === 'league');
                 const allLeagueMatchesCompleted = leagueMatches.every((m: Match) =>
                     m.status === 'completed' || m.status === 'tied'

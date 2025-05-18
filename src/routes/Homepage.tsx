@@ -154,7 +154,14 @@ const HomePage: React.FC = () => {
     }
   }, [tournament]);
   return (
-    <>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 3,
+      position: 'relative',
+      minHeight: 'calc(100vh - 180px)',
+      width: '100vw',
+    }}>
       {floatingItems.map(({ icon, label, size, initialX, initialY, delay }, i) => (
         <motion.div
           key={i}
@@ -222,7 +229,12 @@ const HomePage: React.FC = () => {
         <Typography
           variant={isMobile ? "h5" : "h4"}
           align="center"
-          sx={{ mt: 5, mb: 2 }}
+          sx={{
+            color: '#001838',
+            fontWeight: 600,
+            mb: 3,
+            textAlign: 'center'
+          }}
         >
           Welcome to CricketTrack – The Game, Live.
         </Typography>
@@ -401,7 +413,7 @@ const HomePage: React.FC = () => {
           </Button>
         </Paper>
       </Container>
-    </>
+    </Box>
   );
 };
 
