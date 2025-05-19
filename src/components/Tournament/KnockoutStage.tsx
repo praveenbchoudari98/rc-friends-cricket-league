@@ -1,18 +1,20 @@
-import React from 'react';
-import { Box, Typography} from '@mui/material';
-import { 
-    EmojiEvents as TrophyIcon, 
-    EmojiEvents as QualifierIcon, 
-    Stars as FinalIcon, 
+import React, { useEffect,useRef } from 'react';
+import { Box, Typography } from '@mui/material';
+import {
+    EmojiEvents as TrophyIcon,
+    EmojiEvents as QualifierIcon,
+    Stars as FinalIcon,
     Looks as SecondIcon,
     Filter3 as ThirdIcon,
     LooksOne as FirstIcon,
     SportsKabaddi as VersusIcon,
     Pending as QualifierWinnerIcon
 } from '@mui/icons-material';
+import Confetti from "react-confetti";
 import { Celebration as CelebrationIcon } from '@mui/icons-material';
 import type { Match, Team, TeamStats, MatchType, MatchStatus, TournamentStage } from '../../types';
 import { MatchCard as MatchCardComponent } from '../Matches/MatchCard';
+import { useWindowSize } from "@react-hook/window-size";
 
 interface KnockoutStageProps {
     matches: Match[];
@@ -21,14 +23,35 @@ interface KnockoutStageProps {
     currentStage: TournamentStage;
 }
 
-export const KnockoutStage: React.FC<KnockoutStageProps> = ({ 
-    matches, 
-    pointsTable, 
-    onMatchUpdate, 
-    currentStage 
+export const KnockoutStage: React.FC<KnockoutStageProps> = ({
+    matches,
+    pointsTable,
+    onMatchUpdate,
+    currentStage
 }: KnockoutStageProps) => {
     // Add animation trigger state
+  const divRef = useRef(null);
     const [animate, setAnimate] = React.useState(false);
+    const [dimensions, setDimensions] = React.useState({ width: 100, height: 100 });
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (divRef.current) {
+        setDimensions({
+          width: divRef.current.offsetWidth,
+          height: divRef.current.offsetHeight,
+        });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, []);
+
 
     // Trigger animation on mount
     React.useEffect(() => {
@@ -38,12 +61,12 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
 
     // Check if all league matches are completed
     const leagueMatches = matches.filter((m: Match) => m.matchType === 'league');
-    const allLeagueMatchesCompleted = leagueMatches.length > 0 && 
-    leagueMatches.every((m: Match) => m.status === 'completed' || m.status === 'tied');
-    
+    const allLeagueMatchesCompleted = leagueMatches.length > 0 &&
+        leagueMatches.every((m: Match) => m.status === 'completed' || m.status === 'tied');
+
     const getQualificationText = (matchType: MatchType, teamIndex: 1 | 2): string => {
         if (!pointsTable || pointsTable.length === 0 || !allLeagueMatchesCompleted) return 'TBD';
-        
+
         if (matchType === ('qualifier' as MatchType)) {
             if (teamIndex === 1) {
                 const team = pointsTable[1]?.team;
@@ -109,7 +132,7 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
         status: 'scheduled' as MatchStatus,
         venue: 'TBD'
     } as Match;
-    
+
     const finalMatch = matches.find((m: Match) => m.matchType === 'final') || {
         id: 'placeholder-final',
         team1: allLeagueMatchesCompleted ? pointsTable[0]?.team : placeholderTeam,
@@ -118,7 +141,7 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
         status: 'scheduled',
         venue: 'TBD'
     } as Match;
-    
+
     // Get super duper over matches
     const qualifierSuperDuperOvers = matches
         .filter((m: Match) => m.matchType === 'super_duper_over' && m.parentMatchId === qualifierMatch.id)
@@ -129,12 +152,12 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
         .sort((a: Match, b: Match) => (a.date?.getTime() || 0) - (b.date?.getTime() || 0));
 
     // Filter matches for display
-    const displayMatches = matches.filter((m: Match) => 
-        m.matchType === ('qualifier' as MatchType) || 
-        m.matchType === 'final' || 
+    const displayMatches = matches.filter((m: Match) =>
+        m.matchType === ('qualifier' as MatchType) ||
+        m.matchType === 'final' ||
         m.matchType === 'super_duper_over'
     );
-    
+
     const winner = finalMatch?.result?.winner || finalSuperDuperOvers[finalSuperDuperOvers.length - 1]?.result?.winner;
     const finalMatchTied = finalMatch?.status === 'tied' && !finalSuperDuperOvers.find((m: Match) => m.result?.winner);
     const tournamentComplete = Boolean(winner);
@@ -144,10 +167,10 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
         try {
             const dateObj = typeof date === 'string' ? new Date(date) : date;
             if (isNaN(dateObj.getTime())) return '';
-            
-            return new Intl.DateTimeFormat('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
+
+            return new Intl.DateTimeFormat('en-US', {
+                month: 'short',
+                day: 'numeric'
             }).format(dateObj);
         } catch (error) {
             console.error('Error formatting date:', error);
@@ -155,14 +178,14 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
         }
     };
 
-    const KnockoutMatchCard = ({ 
-        match, 
+    const KnockoutMatchCard = ({
+        match,
         title,
         matchType,
         superDuperOvers = [],
         onUpdate
-    }: { 
-        match?: Match, 
+    }: {
+        match?: Match,
         title: string,
         matchType: 'qualifier' | 'final',
         superDuperOvers?: Match[],
@@ -176,254 +199,255 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
         }, [onUpdate]);
 
         return (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                width: '100%',
-                maxWidth: 320,
-                position: 'relative'
-            }}
-        >
-            <Box 
+            <Box
                 sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 1,
-                    position: 'relative',
-                    mb: 1,
-                    '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        bottom: -8,
-                        left: '10%',
-                        width: '80%',
-                        height: '2px',
-                        background: 'linear-gradient(90deg, transparent, #FF8C00, transparent)',
-                        animation: 'shimmer 2s infinite',
-                    },
-                    '@keyframes shimmer': {
-                        '0%': { opacity: 0.4 },
-                        '50%': { opacity: 1 },
-                        '100%': { opacity: 0.4 }
-                    }
-                }}
-            >
-                {matchType === 'qualifier' ? (
-                    <QualifierIcon 
-                        sx={{ 
-                            color: '#FF8C00',
-                            fontSize: '28px',
-                            animation: 'bounce 1s infinite',
-                            '@keyframes bounce': {
-                                '0%, 100%': { transform: 'translateY(0)' },
-                                '50%': { transform: 'translateY(-5px)' }
-                            }
-                        }}
-                    />
-                ) : (
-                    <FinalIcon 
-                        sx={{ 
-                            color: '#FFD700',
-                            fontSize: '28px',
-                            animation: 'rotate 2s infinite',
-                            '@keyframes rotate': {
-                                '0%': { transform: 'rotate(0deg)' },
-                                '100%': { transform: 'rotate(360deg)' }
-                            }
-                        }}
-                    />
-                )}
-                <Typography 
-                    variant="h6" 
-                    sx={{
-                        color: matchType === 'qualifier' ? '#FF8C00' : '#FFD700',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.1em',
-                        textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                        animation: 'pulse 2s infinite',
-                        '@keyframes pulse': {
-                            '0%': { opacity: 0.8 },
-                            '50%': { opacity: 1 },
-                            '100%': { opacity: 0.8 }
-                        }
-                    }}
-                >
-                    {title}
-                </Typography>
-            </Box>
-
-            {/* Team Position Indicators */}
-            <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                px: 2,
-                mb: 1
-            }}>
-                <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 1,
-                    color: matchType === 'qualifier' ? '#FF8C00' : '#FFD700'
-                }}>
-                    {matchType === 'qualifier' ? (
-                        <>
-                            <SecondIcon />
-                            <Typography variant="body2" fontWeight="600">
-                                2nd Position
-                            </Typography>
-                        </>
-                    ) : (
-                        <>
-                            <FirstIcon />
-                            <Typography variant="body2" fontWeight="600">
-                                1st Position
-                            </Typography>
-                        </>
-                    )}
-                </Box>
-                <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    color: matchType === 'qualifier' ? '#FF8C00' : '#FFD700',
-                    mx: 2
-                }}>
-                    <VersusIcon sx={{ 
-                        fontSize: '24px',
-                        animation: 'pulse 1.5s infinite',
-                        '@keyframes pulse': {
-                            '0%, 100%': { transform: 'scale(1)' },
-                            '50%': { transform: 'scale(1.2)' }
-                        }
-                    }} />
-                </Box>
-                <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 1,
-                    color: matchType === 'qualifier' ? '#FF8C00' : '#FFD700'
-                }}>
-                    {matchType === 'qualifier' ? (
-                        <>
-                            <ThirdIcon />
-                            <Typography variant="body2" fontWeight="600">
-                                3rd Position
-                            </Typography>
-                        </>
-                    ) : (
-                        <>
-                            <QualifierWinnerIcon sx={{ 
-                                animation: 'spin 2s linear infinite',
-                                '@keyframes spin': {
-                                    '0%': { transform: 'rotate(0deg)' },
-                                    '100%': { transform: 'rotate(360deg)' }
-                                }
-                            }} />
-                            <Typography variant="body2" fontWeight="600">
-                                Qualifier Winner
-                            </Typography>
-                        </>
-                    )}
-                </Box>
-            </Box>
-
-            {/* Parent Match */}
-            {match && (
-                <MatchCardComponent 
-                    match={match}
-                    onUpdate={handleUpdate}
-                    currentStage={currentStage}
-                    readOnly={true}
-                />
-            )}
-
-            {/* Super Duper Over Matches */}
-            {superDuperOvers.length > 0 && (
-                <Box sx={{ 
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 2,
-                    pl: 4,
-                    position: 'relative',
-                    '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        left: '10px',
-                        top: 0,
-                        bottom: 0,
-                        width: '2px',
-                        background: 'linear-gradient(to bottom, #FF8C00 0%, #E67E00 100%)',
-                        borderRadius: '4px'
-                    }
-                }}>
-                    {superDuperOvers.map((superDuperOver: Match, index: number) => (
-                        <Box 
-                            key={superDuperOver.id}
+                    width: '100%',
+                    maxWidth: 320,
+                    position: 'relative'
+                }}
+            >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 1,
+                        position: 'relative',
+                        mb: 1,
+                        '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            bottom: -8,
+                            left: '10%',
+                            width: '80%',
+                            height: '2px',
+                            background: 'linear-gradient(90deg, transparent, #FF8C00, transparent)',
+                            animation: 'shimmer 2s infinite',
+                        },
+                        '@keyframes shimmer': {
+                            '0%': { opacity: 0.4 },
+                            '50%': { opacity: 1 },
+                            '100%': { opacity: 0.4 }
+                        }
+                    }}
+                >
+                    {matchType === 'qualifier' ? (
+                        <QualifierIcon
                             sx={{
-                                p: 2,
-                                bgcolor: 'white',
-                                borderRadius: 2,
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                border: '1px solid rgba(0,0,0,0.1)',
-                                position: 'relative',
-                                '&::before': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    left: '-24px',
-                                    top: '50%',
-                                    width: '12px',
-                                    height: '2px',
-                                    background: 'linear-gradient(to right, #FF8C00 0%, #E67E00 100%)',
-                                    borderRadius: '4px'
+                                color: '#FF8C00',
+                                fontSize: '28px',
+                                animation: 'bounce 1s infinite',
+                                '@keyframes bounce': {
+                                    '0%, 100%': { transform: 'translateY(0)' },
+                                    '50%': { transform: 'translateY(-5px)' }
                                 }
                             }}
-                        >
-                            <Typography 
-                                variant="subtitle2" 
-                                sx={{ 
-                                    color: '#FF8C00',
-                                    fontWeight: 600,
-                                    mb: 1,
-                                    textAlign: 'center'
+                        />
+                    ) : (
+                        <FinalIcon
+                            sx={{
+                                color: '#FFD700',
+                                fontSize: '28px',
+                                animation: 'rotate 2s infinite',
+                                '@keyframes rotate': {
+                                    '0%': { transform: 'rotate(0deg)' },
+                                    '100%': { transform: 'rotate(360deg)' }
+                                }
+                            }}
+                        />
+                    )}
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            color: matchType === 'qualifier' ? '#FF8C00' : '#FFD700',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.1em',
+                            textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                            animation: 'pulse 2s infinite',
+                            '@keyframes pulse': {
+                                '0%': { opacity: 0.8 },
+                                '50%': { opacity: 1 },
+                                '100%': { opacity: 0.8 }
+                            }
+                        }}
+                    >
+                        {title}
+                    </Typography>
+                </Box>
+
+                {/* Team Position Indicators */}
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    px: 2,
+                    mb: 1
+                }}>
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        color: matchType === 'qualifier' ? '#FF8C00' : '#FFD700'
+                    }}>
+                        {matchType === 'qualifier' ? (
+                            <>
+                                <SecondIcon />
+                                <Typography variant="body2" fontWeight="600">
+                                    2nd Position
+                                </Typography>
+                            </>
+                        ) : (
+                            <>
+                                <FirstIcon />
+                                <Typography variant="body2" fontWeight="600">
+                                    1st Position
+                                </Typography>
+                            </>
+                        )}
+                    </Box>
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        color: matchType === 'qualifier' ? '#FF8C00' : '#FFD700',
+                        mx: 2
+                    }}>
+                        <VersusIcon sx={{
+                            fontSize: '24px',
+                            animation: 'pulse 1.5s infinite',
+                            '@keyframes pulse': {
+                                '0%, 100%': { transform: 'scale(1)' },
+                                '50%': { transform: 'scale(1.2)' }
+                            }
+                        }} />
+                    </Box>
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        color: matchType === 'qualifier' ? '#FF8C00' : '#FFD700'
+                    }}>
+                        {matchType === 'qualifier' ? (
+                            <>
+                                <ThirdIcon />
+                                <Typography variant="body2" fontWeight="600">
+                                    3rd Position
+                                </Typography>
+                            </>
+                        ) : (
+                            <>
+                                <QualifierWinnerIcon sx={{
+                                    animation: 'spin 2s linear infinite',
+                                    '@keyframes spin': {
+                                        '0%': { transform: 'rotate(0deg)' },
+                                        '100%': { transform: 'rotate(360deg)' }
+                                    }
+                                }} />
+                                <Typography variant="body2" fontWeight="600">
+                                    Qualifier Winner
+                                </Typography>
+                            </>
+                        )}
+                    </Box>
+                </Box>
+
+                {/* Parent Match */}
+                {match && (
+                    <MatchCardComponent
+                        match={match}
+                        onUpdate={handleUpdate}
+                        currentStage={currentStage}
+                        readOnly={true}
+                    />
+                )}
+
+                {/* Super Duper Over Matches */}
+                {superDuperOvers.length > 0 && (
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                        pl: 4,
+                        position: 'relative',
+                        '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            left: '10px',
+                            top: 0,
+                            bottom: 0,
+                            width: '2px',
+                            background: 'linear-gradient(to bottom, #FF8C00 0%, #E67E00 100%)',
+                            borderRadius: '4px'
+                        }
+                    }}>
+                        {superDuperOvers.map((superDuperOver: Match, index: number) => (
+                            <Box
+                                key={superDuperOver.id}
+                                sx={{
+                                    p: 2,
+                                    bgcolor: 'white',
+                                    borderRadius: 2,
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                    border: '1px solid rgba(0,0,0,0.1)',
+                                    position: 'relative',
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        left: '-24px',
+                                        top: '50%',
+                                        width: '12px',
+                                        height: '2px',
+                                        background: 'linear-gradient(to right, #FF8C00 0%, #E67E00 100%)',
+                                        borderRadius: '4px'
+                                    }
                                 }}
                             >
-                                Super Duper Over {index + 1}
-                                {superDuperOver.result?.winner && (
-                                    <Typography 
-                                        component="span" 
-                                        sx={{ 
-                                            ml: 1,
-                                            color: 'success.main',
-                                            fontSize: '0.8rem'
-                                        }}
-                                    >
-                                        • Winner: {superDuperOver.result.winner.name}
-                                    </Typography>
-                                )}
-                            </Typography>
-                                <MatchCardComponent 
+                                <Typography
+                                    variant="subtitle2"
+                                    sx={{
+                                        color: '#FF8C00',
+                                        fontWeight: 600,
+                                        mb: 1,
+                                        textAlign: 'center'
+                                    }}
+                                >
+                                    Super Duper Over {index + 1}
+                                    {superDuperOver.result?.winner && (
+                                        <Typography
+                                            component="span"
+                                            sx={{
+                                                ml: 1,
+                                                color: 'success.main',
+                                                fontSize: '0.8rem'
+                                            }}
+                                        >
+                                            • Winner: {superDuperOver.result.winner.name}
+                                        </Typography>
+                                    )}
+                                </Typography>
+                                <MatchCardComponent
                                     match={superDuperOver}
                                     onUpdate={handleUpdate}
                                     currentStage={currentStage}
                                     readOnly={true}
                                 />
+                            </Box>
+                        ))}
+                    </Box>
+                )}
             </Box>
-                    ))}
-                </Box>
-            )}
-        </Box>
-    );
+        );
     };
 
     const WinnerShowcase = ({ team }: { team?: Team }) => {
         if (!team) return null;
-        
+
         return (
             <Box
+            ref={divRef}
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -431,7 +455,8 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                     gap: 3,
                     position: 'relative'
                 }}
-            >
+                >
+                <Confetti width={dimensions.width} height={dimensions.height} numberOfPieces={1000} />
                 {/* Trophy Cup Image */}
                 <Box
                     sx={{
@@ -441,8 +466,8 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                         mb: 2
                     }}
                 >
-                    <TrophyIcon 
-                        sx={{ 
+                    <TrophyIcon
+                        sx={{
                             width: '100%',
                             height: '100%',
                             color: '#FFD700',
@@ -536,8 +561,8 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                         position: 'relative'
                     }}
                 >
-                    <CelebrationIcon 
-                        sx={{ 
+                    <CelebrationIcon
+                        sx={{
                             position: 'absolute',
                             top: -30,
                             left: -30,
@@ -546,8 +571,8 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                             transform: 'rotate(-45deg)'
                         }}
                     />
-                    <CelebrationIcon 
-                        sx={{ 
+                    <CelebrationIcon
+                        sx={{
                             position: 'absolute',
                             top: -30,
                             right: -30,
@@ -596,8 +621,8 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
     };
 
     return (
-        <Box 
-            sx={{ 
+        <Box
+            sx={{
                 minHeight: '100vh',
                 background: 'linear-gradient(135deg, rgba(0,24,56,0.97) 0%, rgba(0,24,56,0.95) 100%)',
                 backgroundSize: 'cover',
@@ -606,10 +631,10 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                 position: 'relative'
             }}
         >
-            <Typography 
-                variant="h4" 
-                sx={{ 
-                    textAlign: 'center', 
+            <Typography
+                variant="h4"
+                sx={{
+                    textAlign: 'center',
                     mb: { xs: 4, md: 6 },
                     color: 'white',
                     fontWeight: 700,
@@ -620,8 +645,8 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                 {finalMatchTied ? 'Tournament Tied' : (tournamentComplete ? 'Tournament Complete' : 'Road to the Finals')}
             </Typography>
 
-            <Box 
-                sx={{ 
+            <Box
+                sx={{
                     display: 'grid',
                     gridTemplateColumns: {
                         xs: '1fr',
@@ -636,7 +661,7 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
             >
                 {/* Qualifier Match */}
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <Box sx={{ 
+                    <Box sx={{
                         opacity: 0,
                         transform: 'translateY(20px)',
                         animation: animate ? 'fadeInUp 0.6s ease forwards' : 'none',
@@ -651,7 +676,7 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                             }
                         }
                     }}>
-                        <KnockoutMatchCard 
+                        <KnockoutMatchCard
                             match={qualifierMatch}
                             title="QUALIFIER"
                             matchType="qualifier"
@@ -662,8 +687,8 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                 </Box>
 
                 {/* First Connector */}
-                <Box 
-                    sx={{ 
+                <Box
+                    sx={{
                         display: { xs: 'none', md: 'block' },
                         position: 'relative',
                         height: '2px',
@@ -689,7 +714,7 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
 
                 {/* Final Match */}
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <Box sx={{ 
+                    <Box sx={{
                         opacity: 0,
                         transform: 'translateY(20px)',
                         animation: animate ? 'fadeInUp 0.6s ease forwards 1.2s' : 'none',
@@ -704,7 +729,7 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                             }
                         }
                     }}>
-                        <KnockoutMatchCard 
+                        <KnockoutMatchCard
                             match={finalMatch}
                             title="FINAL"
                             matchType="final"
@@ -717,8 +742,8 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                 {winner && (
                     <>
                         {/* Second Connector */}
-                        <Box 
-                            sx={{ 
+                        <Box
+                            sx={{
                                 display: { xs: 'none', md: 'block' },
                                 position: 'relative',
                                 height: '2px',
@@ -733,8 +758,8 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                         />
 
                         {/* Winner Showcase */}
-                        <Box sx={{ 
-                            display: 'flex', 
+                        <Box sx={{
+                            display: 'flex',
                             justifyContent: 'center',
                             opacity: 0,
                             transform: 'translateY(20px)',
