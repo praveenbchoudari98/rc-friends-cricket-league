@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import Slider from "react-slick";
 import { motion } from "framer-motion";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useNavigate } from "react-router-dom";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@react-hook/window-size";
@@ -29,6 +30,7 @@ import Bat from "../assets/images/bat.webp";
 import MIRC24 from "../assets/images/MIRC24.webp";
 import RC24 from "../assets/images/RC24.jpg";
 import RCControl from "../assets/images/RCControls.webp";
+import { LoadingScreen } from "../components/LoadingScreen";
 import { useTournamentContext } from "../context/TournamentContext";
 
 const carouselImages = [RC24, MIRC24, RCControl];
@@ -85,25 +87,13 @@ const floatAnimation = {
   rotate: [0, 15, -15, 20, 0],
 };
 
-const rc24TextAnimation = {
-  y: ["0%", "10%", "0%", "-10%", "0%"],
-  opacity: [1, 0.8, 1, 0.8, 1],
-  scale: [1, 1.1, 1, 1.1, 1],
-  textShadow: [
-    "0 0 8px #ff4500, 0 0 20px #ff6347",
-    "0 0 12px #ff4500, 0 0 28px #ff6347",
-    "0 0 8px #ff4500, 0 0 20px #ff6347",
-    "0 0 12px #ff4500, 0 0 28px #ff6347",
-    "0 0 8px #ff4500, 0 0 20px #ff6347",
-  ],
-};
-
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [width, height] = useWindowSize();
+  const [isLoading, setIsLoading] = useState(false);
   const [showConfetti, setShowConfetti] = React.useState(true);
   const [selectedTeam, setSelectedTeam] = React.useState(null);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -185,6 +175,10 @@ const HomePage: React.FC = () => {
 
   const handleTeamClick = (team: any) => {
     setSelectedTeam(team);
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false); // hide after done
+    }, 2000); // adjust timing as needed
     setDialogOpen(true);
   };
 
@@ -407,13 +401,24 @@ const HomePage: React.FC = () => {
                   sx={{ cursor: "pointer", p: 2, borderRadius: 3 }}
                   onClick={() => handleTeamClick(team)}
                 >
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Avatar
-                      src={team.logo}
-                      alt={team.name}
-                      sx={{ width: 56, height: 56 }}
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Avatar
+                        src={team.logo}
+                        alt={team.name}
+                        sx={{ width: 56, height: 56 }}
+                      />
+                      <Typography variant="h6">{team.name}</Typography>
+                    </Stack>
+                    <VisibilityIcon
+                      sx={{ cursor: "pointer", color: "primary.main" }}
+                      onClick={() => handleTeamClick(team)}
                     />
-                    <Typography variant="h6">{team.name}</Typography>
                   </Stack>
                 </Card>
               </Grid>
@@ -493,6 +498,7 @@ const HomePage: React.FC = () => {
           </Button>
         </Paper>
       </Container>
+      {isLoading && <LoadingScreen />}
 
       <Dialog
         open={dialogOpen}
