@@ -13,14 +13,19 @@ import {
   useMediaQuery,
   Avatar,
   Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import Slider from "react-slick";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
+import Confetti from "react-confetti";
+import { useWindowSize } from "@react-hook/window-size";
 import kit from "../assets/images/Kit.webp";
 import Ball from "../assets/images/ball.jpg";
-import Bat from '../assets/images/bat.webp'
+import Bat from "../assets/images/bat.webp";
 import MIRC24 from "../assets/images/MIRC24.webp";
 import RC24 from "../assets/images/RC24.jpg";
 import RCControl from "../assets/images/RCControls.webp";
@@ -55,10 +60,23 @@ const features = [
 const floatingItems = [
   { icon: "🏏", label: "Bat", size: 60, initialX: 2, initialY: 20, delay: 0 },
   { icon: "🥎", label: "Ball", size: 55, initialX: 90, initialY: 35, delay: 1 },
-  { icon: "🧤", label: "Gloves", size: 50, initialX: 45, initialY: 60, delay: 2 },
-  { icon: "🎽", label: "Jersey", size: 65, initialX: 80, initialY: 80, delay: 1.5 },
+  {
+    icon: "🧤",
+    label: "Gloves",
+    size: 50,
+    initialX: 45,
+    initialY: 60,
+    delay: 2,
+  },
+  {
+    icon: "🎽",
+    label: "Jersey",
+    size: 65,
+    initialX: 80,
+    initialY: 80,
+    delay: 1.5,
+  },
   { icon: "🥎", label: "Ball", size: 55, initialX: 1, initialY: 40, delay: 1 },
-
 ];
 
 const floatAnimation = {
@@ -85,6 +103,10 @@ const HomePage: React.FC = () => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [width, height] = useWindowSize();
+  const [showConfetti, setShowConfetti] = React.useState(true);
+  const [selectedTeam, setSelectedTeam] = React.useState(null);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
   const [stats, setStats] = React.useState([
     { label: "Matches Covered", value: 342 },
     { label: "Runs Recorded", value: 58200 },
@@ -92,22 +114,21 @@ const HomePage: React.FC = () => {
   ]);
   const [liveMatchInfo, setLiveMatchInfo] = React.useState({
     team1: {
-      name: '',
-      runs: '',
-      wickets: '',
-      overs: '',
-      logo: ''
+      name: "",
+      runs: "",
+      wickets: "",
+      overs: "",
+      logo: "",
     },
     team2: {
-      runs: '',
-      wickets: '',
-      overs: '',
-      name: '',
-      logo: ''
+      runs: "",
+      wickets: "",
+      overs: "",
+      name: "",
+      logo: "",
     },
-    matchType: ''
-  }
-  )
+    matchType: "",
+  });
 
   const { tournament } = useTournamentContext();
 
@@ -123,79 +144,110 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     if (tournament.pointsTable.length !== 0) {
       const { pointsTable, matchesCompleted } = tournament;
-      const recentMatch = tournament.matches.filter(match => match.status === "completed")[0];
+      const recentMatch = tournament.matches.filter(
+        (match) => match.status === "completed"
+      )[0];
       let runsScored = 0;
       let wicketsTaken = 0;
-      pointsTable.forEach(team => {
+      pointsTable.forEach((team) => {
         runsScored += team.runsScored;
         wicketsTaken += team.wicketsTaken;
       });
       setLiveMatchInfo({
         team1: {
-          name: recentMatch.team1.name,
-          runs: recentMatch.result?.team1Score.runs,
-          wickets: recentMatch.result?.team1Score.wickets,
-          overs: recentMatch.result?.team1Score.overs,
-          logo: recentMatch.team1.logo
+          name: recentMatch?.team1?.name,
+          runs: recentMatch?.result?.team1Score.runs,
+          wickets: recentMatch?.result?.team1Score.wickets,
+          overs: recentMatch?.result?.team1Score.overs,
+          logo: recentMatch?.team1?.logo,
         },
         team2: {
-          name: recentMatch.team2.name,
-          runs: recentMatch.result?.team2Score.runs,
-          wickets: recentMatch.result?.team2Score.wickets,
-          overs: recentMatch.result?.team2Score.overs,
-          logo: recentMatch.team2.logo
+          name: recentMatch?.team2?.name,
+          runs: recentMatch?.result?.team2Score.runs,
+          wickets: recentMatch?.result?.team2Score.wickets,
+          overs: recentMatch?.result?.team2Score.overs,
+          logo: recentMatch?.team2?.logo,
         },
-        matchType: recentMatch.matchType
-      })
+        matchType: recentMatch?.matchType,
+      });
       setStats([
         { label: "Matches Covered", value: matchesCompleted },
         { label: "Runs Recorded", value: runsScored },
         { label: "Wickets Tracked", value: wicketsTaken },
-      ])
+      ]);
     }
   }, [tournament]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowConfetti(false), 8000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleTeamClick = (team: any) => {
+    setSelectedTeam(team);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setSelectedTeam(null);
+  };
+
+  console.log(selectedTeam);
   return (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 3,
-      position: 'relative',
-      minHeight: 'calc(100vh - 180px)',
-      width: '100vw',
-    }}>
-      {floatingItems.map(({ icon, label, size, initialX, initialY, delay }, i) => (
-        <motion.div
-          key={i}
-          aria-label={label}
-          role="img"
-          style={{
-            position: "fixed",
-            top: `${initialY}vh`,
-            left: `${initialX}vw`,
-            fontSize: size,
-            pointerEvents: "none",
-            userSelect: "none",
-            zIndex: 0,
-            filter:
-              "drop-shadow(0 0 12px rgba(255, 69, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 140, 0, 0.7))",
-            color: "#ff4500",
-          }}
-          animate={floatAnimation}
-          transition={{
-            duration: 12 + i * 1.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            repeatType: "mirror",
-            delay,
-          }}
-        >
-          {icon}
-        </motion.div>
-      ))}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+        position: "relative",
+        minHeight: "calc(100vh - 180px)",
+        width: "100vw",
+      }}
+    >
+      {showConfetti && (
+        <Confetti width={width} height={height} numberOfPieces={1000} />
+      )}
+      {floatingItems.map(
+        ({ icon, label, size, initialX, initialY, delay }, i) => (
+          <motion.div
+            key={i}
+            aria-label={label}
+            role="img"
+            style={{
+              position: "fixed",
+              top: `${initialY}vh`,
+              left: `${initialX}vw`,
+              fontSize: size,
+              pointerEvents: "none",
+              userSelect: "none",
+              zIndex: 0,
+              filter:
+                "drop-shadow(0 0 12px rgba(255, 69, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 140, 0, 0.7))",
+              color: "#ff4500",
+            }}
+            animate={floatAnimation}
+            transition={{
+              duration: 12 + i * 1.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              repeatType: "mirror",
+              delay,
+            }}
+          >
+            {icon}
+          </motion.div>
+        )
+      )}
 
       <Container
         maxWidth="lg"
-        sx={{ mt: { xs: 2, md: 4 }, px: { xs: 1, md: 3 }, position: "relative", zIndex: 1 }}
+        sx={{
+          mt: { xs: 2, md: 4 },
+          px: { xs: 1, md: 3 },
+          position: "relative",
+          zIndex: 1,
+        }}
       >
         <Slider {...sliderSettings}>
           {carouselImages.map((src, i) => (
@@ -231,10 +283,10 @@ const HomePage: React.FC = () => {
           variant={isMobile ? "h5" : "h4"}
           align="center"
           sx={{
-            color: '#001838',
+            color: "#001838",
             fontWeight: 600,
             mb: 3,
-            textAlign: 'center'
+            textAlign: "center",
           }}
         >
           Welcome to CricketTrack – The Game, Live.
@@ -244,20 +296,21 @@ const HomePage: React.FC = () => {
           color="text.secondary"
           sx={{ mb: 4, px: isMobile ? 2 : 0 }}
         >
-          A unified platform for live cricket scores, global coverage, analytics, and cricket passion.
+          A unified platform for live cricket scores, global coverage,
+          analytics, and cricket passion.
         </Typography>
         <Paper
           elevation={3}
           sx={{
             p: 2,
             borderRadius: 2,
-            width: '100%',
-            mx: 'auto',
-            maxWidth: '100%',
+            width: "100%",
+            mx: "auto",
+            maxWidth: "100%",
           }}
         >
           <Stack
-            direction={isMobile ? 'column' : 'row'}
+            direction={isMobile ? "column" : "row"}
             alignItems="center"
             justifyContent="center"
             spacing={isMobile ? 1 : 2}
@@ -267,8 +320,8 @@ const HomePage: React.FC = () => {
             <Typography
               variant="h6"
               fontWeight="bold"
-              textTransform={'capitalize'}
-              sx={{ color: '#e53935', textAlign: isMobile ? 'center' : 'left' }}
+              textTransform={"capitalize"}
+              sx={{ color: "#e53935", textAlign: isMobile ? "center" : "left" }}
             >
               🏏 Live {liveMatchInfo.matchType} Match:
             </Typography>
@@ -343,6 +396,31 @@ const HomePage: React.FC = () => {
           ))}
         </Grid>
 
+        <Container maxWidth="lg" sx={{ mt: 6 }}>
+          <Typography variant={isMobile ? "h6" : "h5"} sx={{ mb: 2 }}>
+            🏏 Registered Teams
+          </Typography>
+          <Grid container spacing={3}>
+            {tournament.teams.map((team, idx) => (
+              <Grid item xs={12} sm={6} md={4} key={idx}>
+                <Card
+                  sx={{ cursor: "pointer", p: 2, borderRadius: 3 }}
+                  onClick={() => handleTeamClick(team)}
+                >
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Avatar
+                      src={team.logo}
+                      alt={team.name}
+                      sx={{ width: 56, height: 56 }}
+                    />
+                    <Typography variant="h6">{team.name}</Typography>
+                  </Stack>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+
         <Typography variant={isMobile ? "h6" : "h5"} sx={{ mt: 6, mb: 2 }}>
           📊 Platform Stats
         </Typography>
@@ -415,6 +493,64 @@ const HomePage: React.FC = () => {
           </Button>
         </Paper>
       </Container>
+
+      <Dialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        maxWidth="lg"
+        fullWidth
+        sx={{ "& .MuiDialog-paper": { width: "900px", maxWidth: "95%" } }}
+      >
+        <DialogTitle>Team Details</DialogTitle>
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {selectedTeam && (
+            <>
+              <Stack spacing={2} mt={1} sx={{ width: "100%", maxWidth: 400 }}>
+                <Typography variant="h6" gutterBottom>
+                  {selectedTeam.name}
+                </Typography>
+                <Avatar
+                  src={selectedTeam.logo}
+                  alt={selectedTeam.name}
+                  sx={{ width: 80, height: 80, mx: "auto", mb: 2 }}
+                />
+                <Typography>
+                  <strong>Captain:</strong> {selectedTeam.captain}
+                </Typography>
+                <Typography>
+                  <strong>Coach:</strong> {selectedTeam.coach}
+                </Typography>
+                <Typography>
+                  <strong>City:</strong> {selectedTeam.city}
+                </Typography>
+                <Typography>
+                  <strong>Total Wins:</strong> {selectedTeam.totalWins}
+                </Typography>
+                <Typography>
+                  <strong>Team Size:</strong> {selectedTeam.teamSize}
+                </Typography>
+                <Typography>
+                  <strong>Date of Birth:</strong> {selectedTeam.dob}
+                </Typography>
+                <Typography sx={{ mt: 2, mb: 1 }}>
+                  <strong>Players:</strong>
+                </Typography>
+                11
+              </Stack>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
