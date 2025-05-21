@@ -9,18 +9,17 @@ import {
   CardContent,
   CardMedia,
   Button,
-  useTheme,
-  useMediaQuery,
   Avatar,
   Stack,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import Slider from "react-slick";
 import { motion } from "framer-motion";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useNavigate } from "react-router-dom";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@react-hook/window-size";
@@ -32,15 +31,20 @@ import RC24 from "../assets/images/RC24.jpg";
 import RCControl from "../assets/images/RCControls.webp";
 import { LoadingScreen } from "../components/LoadingScreen";
 import { useTournamentContext } from "../context/TournamentContext";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import PlayerCard from "./PlayerCard";
 
+// Carousel images
 const carouselImages = [RC24, MIRC24, RCControl];
 
+// Equipments shown in Cricket Gear section
 const equipments = [
   { name: "Cricket Bat", image: Bat },
   { name: "Cricket Ball", image: Ball },
   { name: "Player Kit", image: kit },
 ];
 
+// Features for "What We Offer"
 const features = [
   {
     title: "Live Scores",
@@ -59,6 +63,7 @@ const features = [
   },
 ];
 
+// Floating animated cricket icons
 const floatingItems = [
   { icon: "🏏", label: "Bat", size: 60, initialX: 2, initialY: 20, delay: 0 },
   { icon: "🥎", label: "Ball", size: 55, initialX: 90, initialY: 35, delay: 1 },
@@ -89,34 +94,22 @@ const floatAnimation = {
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [width, height] = useWindowSize();
+
   const [isLoading, setIsLoading] = useState(false);
-  const [showConfetti, setShowConfetti] = React.useState(true);
-  const [selectedTeam, setSelectedTeam] = React.useState(null);
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [stats, setStats] = React.useState([
+  const [showConfetti, setShowConfetti] = useState(true);
+  const [selectedTeam, setSelectedTeam] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [stats, setStats] = useState([
     { label: "Matches Covered", value: 342 },
     { label: "Runs Recorded", value: 58200 },
     { label: "Wickets Tracked", value: 1140 },
   ]);
-  const [liveMatchInfo, setLiveMatchInfo] = React.useState({
-    team1: {
-      name: "",
-      runs: "",
-      wickets: "",
-      overs: "",
-      logo: "",
-    },
-    team2: {
-      runs: "",
-      wickets: "",
-      overs: "",
-      name: "",
-      logo: "",
-    },
+  const [liveMatchInfo, setLiveMatchInfo] = useState({
+    team1: { name: "", runs: "", wickets: "", overs: "", logo: "" },
+    team2: { runs: "", wickets: "", overs: "", name: "", logo: "" },
     matchType: "",
   });
 
@@ -131,15 +124,16 @@ const HomePage: React.FC = () => {
     autoplay: true,
     autoplaySpeed: 4500,
   };
+
   useEffect(() => {
     if (tournament.pointsTable.length !== 0) {
       const { pointsTable, matchesCompleted } = tournament;
-      const recentMatch = tournament.matches.filter(
+      const recentMatch = tournament.matches.find(
         (match) => match.status === "completed"
-      )[0];
+      );
       let runsScored = 0;
       let wicketsTaken = 0;
-      pointsTable.forEach((team) => {
+      pointsTable.forEach((team: any) => {
         runsScored += team.runsScored;
         wicketsTaken += team.wicketsTaken;
       });
@@ -168,6 +162,13 @@ const HomePage: React.FC = () => {
     }
   }, [tournament]);
 
+  const playerOfTournament = tournament.pointsTable.reduce(
+    (maxPlayer, current) => {
+      return current.netRunRate > maxPlayer.netRunRate ? current : maxPlayer;
+    },
+    tournament.pointsTable[0]
+  );
+
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 8000);
     return () => clearTimeout(timer);
@@ -176,10 +177,8 @@ const HomePage: React.FC = () => {
   const handleTeamClick = (team: any) => {
     setSelectedTeam(team);
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false); // hide after done
-    }, 2000); // adjust timing as needed
     setDialogOpen(true);
+    setTimeout(() => setIsLoading(false), 1200);
   };
 
   const handleDialogClose = () => {
@@ -187,20 +186,22 @@ const HomePage: React.FC = () => {
     setSelectedTeam(null);
   };
 
-  console.log(selectedTeam);
+  console.log(playerOfTournament);
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 3,
+        gap: 4,
         position: "relative",
         minHeight: "calc(100vh - 180px)",
         width: "100vw",
+        backgroundColor: "#e3f6f5",
+        color: "#023e8a",
       }}
     >
       {showConfetti && (
-        <Confetti width={width} height={height} numberOfPieces={1000} />
+        <Confetti width={width} height={height} numberOfPieces={700} />
       )}
       {floatingItems.map(
         ({ icon, label, size, initialX, initialY, delay }, i) => (
@@ -217,8 +218,8 @@ const HomePage: React.FC = () => {
               userSelect: "none",
               zIndex: 0,
               filter:
-                "drop-shadow(0 0 12px rgba(255, 69, 0, 0.9)) drop-shadow(0 0 20px rgba(255, 140, 0, 0.7))",
-              color: "#ff4500",
+                "drop-shadow(0 0 8px #48cae4) drop-shadow(0 0 15px #90e0ef)",
+              color: "#0077b6",
             }}
             animate={floatAnimation}
             transition={{
@@ -237,8 +238,8 @@ const HomePage: React.FC = () => {
       <Container
         maxWidth="lg"
         sx={{
-          mt: { xs: 2, md: 4 },
-          px: { xs: 1, md: 3 },
+          mt: { xs: 3, md: 5 },
+          px: { xs: 2, md: 4 },
           position: "relative",
           zIndex: 1,
         }}
@@ -249,9 +250,10 @@ const HomePage: React.FC = () => {
               key={i}
               sx={{
                 width: "100%",
-                height: isMobile ? 200 : 450,
-                borderRadius: 2,
+                height: isMobile ? 220 : 460,
+                borderRadius: 3,
                 overflow: "hidden",
+                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
                 position: "relative",
               }}
             >
@@ -265,7 +267,6 @@ const HomePage: React.FC = () => {
                   objectFit: "cover",
                   userSelect: "none",
                   pointerEvents: "none",
-                  display: "block",
                 }}
                 loading="lazy"
               />
@@ -274,124 +275,259 @@ const HomePage: React.FC = () => {
         </Slider>
 
         <Typography
-          variant={isMobile ? "h5" : "h4"}
+          variant={isMobile ? "h4" : "h3"}
           align="center"
           sx={{
-            color: "#001838",
-            fontWeight: 600,
-            mb: 3,
-            textAlign: "center",
+            color: "#023e8a",
+            fontWeight: 700,
+            mt: 4,
+            mb: 2,
+            textShadow: "1px 1px 3px rgba(0,0,0,0.1)",
           }}
         >
           Welcome to CricketTrack – The Game, Live.
         </Typography>
         <Typography
           align="center"
-          color="text.secondary"
-          sx={{ mb: 4, px: isMobile ? 2 : 0 }}
+          sx={{
+            mb: 5,
+            px: isMobile ? 3 : 8,
+            color: "#0077b6",
+            fontWeight: 500,
+          }}
         >
           A unified platform for live cricket scores, global coverage,
           analytics, and cricket passion.
         </Typography>
+
         <Paper
           elevation={3}
           sx={{
-            p: 2,
-            borderRadius: 2,
-            width: "100%",
+            p: 3,
+            borderRadius: 3,
+            maxWidth: 900,
             mx: "auto",
-            maxWidth: "100%",
+            backgroundColor: "#caf0f8",
+            color: "#03045e",
           }}
         >
           <Stack
             direction={isMobile ? "column" : "row"}
             alignItems="center"
-            justifyContent="center"
-            spacing={isMobile ? 1 : 2}
-            flexWrap="wrap"
+            justifyContent="space-around"
+            spacing={isMobile ? 2 : 4}
           >
-            {/* Title */}
             <Typography
               variant="h6"
-              fontWeight="bold"
-              textTransform={"capitalize"}
-              sx={{ color: "#e53935", textAlign: isMobile ? "center" : "left" }}
+              fontWeight="700"
+              textTransform="capitalize"
+              sx={{ color: "#0077b6", textAlign: isMobile ? "center" : "left" }}
             >
-              🏏 Live {liveMatchInfo.matchType} Match:
+              🏏 Live {liveMatchInfo.matchType || "Match"}:
             </Typography>
 
-            {/* Team 1 */}
-            <Box display="flex" alignItems="center" gap={1}>
-              <Typography variant="h6" fontWeight="bold">
-                {liveMatchInfo.team1.name}
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="h6" fontWeight="700">
+                {liveMatchInfo.team1.name || "-"}
               </Typography>
               <Avatar
                 src={liveMatchInfo.team1.logo}
                 alt="Team1 Logo"
-                sx={{ width: 24, height: 24 }}
+                sx={{ width: 28, height: 28, border: "2px solid #0077b6" }}
               />
-              <Typography fontSize="1rem" fontWeight="medium">
+              <Typography fontSize="1rem" fontWeight="600" color="#023e8a">
                 {liveMatchInfo.team1.runs}/{liveMatchInfo.team1.wickets}
               </Typography>
-            </Box>
-
-            {/* VS */}
+              <Typography
+                variant="caption"
+                sx={{ fontStyle: "italic", color: "#0077b6" }}
+              >
+                ({liveMatchInfo.team1.overs} overs)
+              </Typography>
+            </Stack>
             <Typography
-              variant="h6"
-              fontWeight="medium"
-              color="text.secondary"
-              sx={{ mx: isMobile ? 0 : 1 }}
+              fontWeight={700}
+              variant="h5"
+              color="#0077b6"
+              sx={{ mx: 2 }}
             >
               vs
             </Typography>
 
-            {/* Team 2 */}
-            <Box display="flex" alignItems="center" gap={1}>
-              <Typography variant="h6" fontWeight="bold">
-                {liveMatchInfo.team2.name}
-              </Typography>
+            <Stack direction="row" alignItems="center" spacing={1}>
               <Avatar
                 src={liveMatchInfo.team2.logo}
                 alt="Team2 Logo"
-                sx={{ width: 24, height: 24 }}
+                sx={{ width: 28, height: 28, border: "2px solid #0077b6" }}
               />
-              <Typography fontSize="1rem" fontWeight="medium">
+              <Typography variant="h6" fontWeight="700">
+                {liveMatchInfo.team2.name || "-"}
+              </Typography>
+              <Typography fontSize="1rem" fontWeight="600" color="#023e8a">
                 {liveMatchInfo.team2.runs}/{liveMatchInfo.team2.wickets}
               </Typography>
-            </Box>
+              <Typography
+                variant="caption"
+                sx={{ fontStyle: "italic", color: "#0077b6" }}
+              >
+                ({liveMatchInfo.team2.overs} overs)
+              </Typography>
+            </Stack>
           </Stack>
         </Paper>
 
-        <Typography variant={isMobile ? "h6" : "h5"} sx={{ mt: 6, mb: 3 }}>
-          💡 Key Features
-        </Typography>
-        <Grid container spacing={3}>
-          {features.map((item, i) => (
-            <Grid item xs={12} md={4} key={i}>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.2 }}
-              >
-                <Paper
-                  elevation={4}
-                  sx={{ p: 3, borderRadius: 3, textAlign: "center" }}
+        <Box mt={6}>
+          <Typography
+            variant="h4"
+            fontWeight="700"
+            sx={{ color: "#0077b6", mb: 3, textAlign: "center" }}
+          >
+            What We Offer
+          </Typography>
+          <Grid container spacing={4} justifyContent="center">
+            {features.map(({ title, desc, icon }, i) => (
+              <Grid key={i} item xs={12} md={4}>
+                <Card
+                  sx={{
+                    height: "100%",
+                    backgroundColor: "#ade8f4",
+                    boxShadow: "0 4px 12px rgba(0, 119, 182, 0.2)",
+                    borderRadius: 3,
+                    transition: "transform 0.3s ease",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      boxShadow: "0 8px 20px rgba(0, 119, 182, 0.35)",
+                    },
+                  }}
                 >
-                  <Typography fontSize={40}>{item.icon}</Typography>
-                  <Typography variant="h6" sx={{ mt: 1 }}>
-                    {item.title}
+                  <CardContent>
+                    <Typography
+                      variant="h5"
+                      sx={{ mb: 1.5 }}
+                      fontWeight={700}
+                      color="#0077b6"
+                      aria-label={`${title} icon`}
+                    >
+                      {icon} {title}
+                    </Typography>
+                    <Typography variant="body1" color="#03045e">
+                      {desc}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
+        <Box mt={6}>
+          <Typography
+            variant="h4"
+            fontWeight="700"
+            sx={{ color: "#0077b6", mb: 3, textAlign: "center" }}
+          >
+            Cricket Gear & Equipment
+          </Typography>
+          <Grid container spacing={4} justifyContent="center">
+            {equipments.map(({ name, image }, i) => (
+              <Grid key={i} item xs={12} sm={6} md={4}>
+                <Card
+                  sx={{
+                    maxWidth: 340,
+                    mx: "auto",
+                    boxShadow: "0 8px 20px rgba(0, 119, 182, 0.25)",
+                    borderRadius: 4,
+                    cursor: "pointer",
+                    transition: "transform 0.3s ease",
+                    "&:hover": {
+                      transform: "scale(1.04)",
+                      boxShadow: "0 12px 30px rgba(0, 119, 182, 0.35)",
+                    },
+                  }}
+                  onClick={() => handleTeamClick({ name, image })}
+                  aria-label={`View details for ${name}`}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleTeamClick({ name, image });
+                  }}
+                >
+                  <CardMedia
+                    component="img"
+                    image={image}
+                    alt={name}
+                    loading="lazy"
+                    sx={{
+                      height: 200,
+                      objectFit: "cover",
+                      borderTopLeftRadius: 16,
+                      borderTopRightRadius: 16,
+                    }}
+                  />
+                  <CardContent>
+                    <Typography
+                      variant="h6"
+                      textAlign="center"
+                      fontWeight={700}
+                      color="#0077b6"
+                    >
+                      {name}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
+        <Box mt={6} mb={6}>
+          <Typography
+            variant="h4"
+            fontWeight="700"
+            sx={{ color: "#0077b6", mb: 3, textAlign: "center" }}
+          >
+            Stats at a Glance
+          </Typography>
+          <Grid
+            container
+            spacing={3}
+            justifyContent="center"
+            maxWidth={900}
+            mx="auto"
+          >
+            {stats.map(({ label, value }, i) => (
+              <Grid key={i} item xs={12} sm={4}>
+                <Paper
+                  elevation={3}
+                  sx={{
+                    py: 4,
+                    px: 2,
+                    borderRadius: 3,
+                    backgroundColor: "#caf0f8",
+                    color: "#023e8a",
+                    textAlign: "center",
+                    boxShadow: "0 6px 18px rgba(0, 119, 182, 0.2)",
+                  }}
+                  role="region"
+                  aria-label={label}
+                >
+                  <Typography variant="h4" fontWeight={700}>
+                    {value.toLocaleString()}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {item.desc}
+                  <Typography variant="subtitle1" fontWeight={600} mt={1}>
+                    {label}
                   </Typography>
                 </Paper>
-              </motion.div>
-            </Grid>
-          ))}
-        </Grid>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
 
         <Container maxWidth="lg" sx={{ mt: 6 }}>
-          <Typography variant={isMobile ? "h6" : "h5"} sx={{ mb: 2 }}>
+          <Typography
+            variant={isMobile ? "h6" : "h4"}
+            sx={{ color: "#0077b6", mb: 3, textAlign: "center" }}
+          >
             🏏 Registered Teams
           </Typography>
           <Grid container spacing={3}>
@@ -425,138 +561,102 @@ const HomePage: React.FC = () => {
             ))}
           </Grid>
         </Container>
-
-        <Typography variant={isMobile ? "h6" : "h5"} sx={{ mt: 6, mb: 2 }}>
-          📊 Platform Stats
-        </Typography>
-        <Grid container spacing={3}>
-          {stats.map((stat, i) => (
-            <Grid item xs={12} sm={4} key={i}>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.85 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: i * 0.2 }}
-              >
-                <Paper
-                  elevation={4}
-                  sx={{ p: 4, borderRadius: 3, textAlign: "center" }}
-                >
-                  <Typography variant="h4" color="primary">
-                    {stat.value}
-                  </Typography>
-                  <Typography variant="subtitle1">{stat.label}</Typography>
-                </Paper>
-              </motion.div>
-            </Grid>
-          ))}
-        </Grid>
-
-        <Typography variant={isMobile ? "h6" : "h5"} sx={{ mt: 6, mb: 2 }}>
-          🧢 Cricket Gear Showcase
-        </Typography>
-        <Grid container spacing={3}>
-          {equipments.map((item, i) => (
-            <Grid item xs={12} sm={4} key={i}>
-              <Card sx={{ maxWidth: 345, borderRadius: 3 }}>
-                <CardMedia
-                  component="img"
-                  height="180"
-                  image={item.image}
-                  alt={item.name}
-                />
-                <CardContent>
-                  <Typography variant="h6" component="div">
-                    {item.name}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
-        <Paper
-          elevation={6}
-          sx={{
-            mt: 8,
-            p: 4,
-            borderRadius: 3,
-            textAlign: "center",
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-          }}
-        >
-          <Typography variant={isMobile ? "h6" : "h5"} sx={{ mb: 2 }}>
-            Ready to explore live cricket like never before?
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => navigate("/schedule")}
-            sx={{ fontWeight: "bold" }}
+        <Container maxWidth="lg" sx={{ mt: 6 }}>
+          <Typography
+            variant={isMobile ? "h6" : "h4"}
+            sx={{ color: "#0077b6", mb: 3, textAlign: "center" }}
           >
-            Go to Schedule
-          </Button>
-        </Paper>
-      </Container>
-      {isLoading && <LoadingScreen />}
-
-      <Dialog
-        open={dialogOpen}
-        onClose={handleDialogClose}
-        maxWidth="lg"
-        fullWidth
-        sx={{ "& .MuiDialog-paper": { width: "900px", maxWidth: "95%" } }}
-      >
-        <DialogTitle>Team Details</DialogTitle>
-        <DialogContent
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+            Hero Of The Tournament
+          </Typography>
+          <PlayerCard player={playerOfTournament} />
+        </Container>
+        <Dialog
+          open={dialogOpen}
+          onClose={handleDialogClose}
+          aria-labelledby="team-dialog-title"
+          fullWidth
+          maxWidth="xs"
         >
-          {selectedTeam && (
-            <>
-              <Stack spacing={2} mt={1} sx={{ width: "100%", maxWidth: 400 }}>
-                <Typography variant="h6" gutterBottom>
-                  {selectedTeam.name}
-                </Typography>
-                <Avatar
-                  src={selectedTeam.logo}
-                  alt={selectedTeam.name}
-                  sx={{ width: 80, height: 80, mx: "auto", mb: 2 }}
-                />
-                <Typography>
-                  <strong>Captain:</strong> {selectedTeam.captain}
-                </Typography>
-                <Typography>
-                  <strong>Coach:</strong> {selectedTeam.coach}
-                </Typography>
-                <Typography>
-                  <strong>City:</strong> {selectedTeam.city}
-                </Typography>
-                <Typography>
-                  <strong>Total Wins:</strong> {selectedTeam.totalWins}
-                </Typography>
-                <Typography>
-                  <strong>Team Size:</strong> {selectedTeam.teamSize}
-                </Typography>
-                <Typography>
-                  <strong>Date of Birth:</strong> {selectedTeam.dob}
-                </Typography>
-                <Typography sx={{ mt: 2, mb: 1 }}>
-                  <strong>Players:</strong>
-                </Typography>
-                11
-              </Stack>
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose}>Close</Button>
-        </DialogActions>
-      </Dialog>
+          <DialogTitle id="team-dialog-title">Team Details</DialogTitle>
+          <DialogContent dividers>
+            {isLoading ? (
+              <LoadingScreen />
+            ) : (
+              selectedTeam && (
+                <>
+                  {selectedTeam.logo && (
+                    <Box
+                      component="img"
+                      src={selectedTeam.logo}
+                      alt={selectedTeam.name}
+                      sx={{
+                        width: "100%",
+                        height: "auto",
+                        borderRadius: 2,
+                        mb: 2,
+                      }}
+                      loading="lazy"
+                    />
+                  )}
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                    color="#0077b6"
+                    textAlign="center"
+                    mb={1}
+                  >
+                    {selectedTeam.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="#03045e"
+                    whiteSpace="pre-line"
+                    textAlign="center"
+                  >
+                    {selectedTeam.description ||
+                      "Young and energetic aggressive batsman✨"}
+                  </Typography>
+                </>
+              )
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose} color="primary" autoFocus>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+
+      <Box
+        component="footer"
+        sx={{
+          mt: 8,
+          py: 4,
+          px: 2,
+          backgroundColor: "black",
+          color: "#ffffff",
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="h6" gutterBottom sx={{ color: "#FF8C00" }}>
+          CricketTrack
+        </Typography>
+        <Typography variant="body2">
+          © {new Date().getFullYear()} CricketTrack. All rights reserved.
+        </Typography>
+        <Stack direction="row" spacing={2} justifyContent="center" mt={2}>
+          <Button color="inherit" size="small" sx={{ textTransform: "none" }}>
+            About Us
+          </Button>
+          <Button color="inherit" size="small" sx={{ textTransform: "none" }}>
+            Contact
+          </Button>
+          <Button color="inherit" size="small" sx={{ textTransform: "none" }}>
+            Privacy Policy
+          </Button>
+        </Stack>
+      </Box>
     </Box>
   );
 };
