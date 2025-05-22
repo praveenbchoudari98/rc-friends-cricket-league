@@ -240,7 +240,6 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
     const { team1, team2 } = match;
     const { team1Score, team2Score } = match.result;
     const { tossWinner, tossDecision, battingFirst, date, time } = match.inningsInfo;
-    console.log(match,"matchsummary")
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: '#1a2d7d' }}>

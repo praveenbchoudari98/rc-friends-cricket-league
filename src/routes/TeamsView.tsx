@@ -16,7 +16,7 @@ export default function TeamsView() {
             flexDirection: 'column', 
             gap: 3,
             position: 'relative',
-            minHeight: 'calc(100vh - 180px)'
+            minHeight: 'calc(100vh - 180px)',
         }}>
             {tournament.status === 'completed' ? (
                 <CompletedTournamentView

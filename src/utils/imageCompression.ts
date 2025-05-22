@@ -1,6 +1,6 @@
 export const compressImage = async (base64String: string): Promise<string> => {
     // If the image is already small enough, return it as is
-    if (base64String.length < 20000) { // Reduced threshold
+    if (base64String.length < 100000) { // Increased threshold to 100KB
         return base64String;
     }
 
@@ -17,10 +17,10 @@ export const compressImage = async (base64String: string): Promise<string> => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
 
-    // Calculate new dimensions (max 100px width/height while maintaining aspect ratio)
+    // Calculate new dimensions (max 500px width/height while maintaining aspect ratio)
     let width = img.width;
     let height = img.height;
-    const maxSize = 100; // Reduced from 200px to 100px
+    const maxSize = 500; // Increased from 100px to 500px for higher quality
 
     if (width > height && width > maxSize) {
         height = Math.round((height * maxSize) / width);

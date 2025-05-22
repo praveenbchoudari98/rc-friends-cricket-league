@@ -11,16 +11,11 @@ import {
   Button,
   Avatar,
   Stack,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
 import Slider from "react-slick";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@react-hook/window-size";
 import kit from "../assets/images/Kit.webp";
@@ -29,9 +24,11 @@ import Bat from "../assets/images/bat.webp";
 import MIRC24 from "../assets/images/MIRC24.webp";
 import RC24 from "../assets/images/RC24.jpg";
 import RCControl from "../assets/images/RCControls.webp";
-import { LoadingScreen } from "../components/LoadingScreen";
 import { useTournamentContext } from "../context/TournamentContext";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Team, TeamStats } from "../types";
+import PlayerDetailsCard from "../components/PlayerDetailsCard/PlayerDetailsCard";
+import { LoadingScreen } from "../components/LoadingScreen";
 import PlayerCard from "./PlayerCard";
 
 // Carousel images
@@ -92,15 +89,45 @@ const floatAnimation = {
   rotate: [0, 15, -15, 20, 0],
 };
 
+function calculatePPS(player, maxValues) {
+  const winRatio = player.matches ? player.wins / player.matches : 0;
+  const runRate = player.oversPlayed ? player.runsScored / player.oversPlayed : 0;
+  const economy = player.oversBowled ? player.runsConceded / player.oversBowled : maxValues.maxEconomy;
+  const wicketsPerMatch = player.matches ? player.wicketsTaken / player.matches : 0;
+  const normalizedRuns = player.runsScored / maxValues.maxRuns;
+
+  const PPS = 
+    (winRatio * 20) +
+    (normalizedRuns * 15) +
+    (runRate * 5) +
+    (wicketsPerMatch * 20) +
+    ((maxValues.maxEconomy - economy) * 10);
+
+  return PPS;
+}
+
+function determineBestPlayer(players) {
+  const maxRuns = Math.max(...players.map(p => p.runsScored));
+  const maxEconomy = Math.max(...players.map(p => p.oversBowled ? p.runsConceded / p.oversBowled : 0));
+
+  return players
+    .map(p => ({
+      ...p,
+      pps: calculatePPS(p, { maxRuns, maxEconomy })
+    }))
+    .sort((a, b) => b.pps - a.pps)[0];
+}
+
+
+
 const HomePage: React.FC = () => {
-  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [width, height] = useWindowSize();
 
   const [isLoading, setIsLoading] = useState(false);
   const [showConfetti, setShowConfetti] = useState(true);
-  const [selectedTeam, setSelectedTeam] = useState<any>(null);
+  const [selectedTeam, setSelectedTeam] = useState<TeamStats>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [stats, setStats] = useState([
     { label: "Matches Covered", value: 342 },
@@ -133,7 +160,7 @@ const HomePage: React.FC = () => {
       );
       let runsScored = 0;
       let wicketsTaken = 0;
-      pointsTable.forEach((team: any) => {
+      pointsTable.forEach((team: TeamStats) => {
         runsScored += team.runsScored;
         wicketsTaken += team.wicketsTaken;
       });
@@ -162,31 +189,28 @@ const HomePage: React.FC = () => {
     }
   }, [tournament]);
 
-  const playerOfTournament = tournament.pointsTable.reduce(
-    (maxPlayer, current) => {
-      return current.netRunRate > maxPlayer.netRunRate ? current : maxPlayer;
-    },
-    tournament.pointsTable[0]
-  );
+  const playerOfTournament = determineBestPlayer(tournament.pointsTable);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 8000);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleTeamClick = (team: any) => {
-    setSelectedTeam(team);
+  const handleTeamClick = (team: Team) => {
+    const selectedTeam = tournament.pointsTable.find(
+      (t: TeamStats) => t.team.name === team.name
+    );
+    if (!selectedTeam) return;
+    setSelectedTeam(selectedTeam);
     setIsLoading(true);
     setDialogOpen(true);
     setTimeout(() => setIsLoading(false), 1200);
   };
-
   const handleDialogClose = () => {
     setDialogOpen(false);
     setSelectedTeam(null);
   };
 
-  console.log(playerOfTournament);
   return (
     <Box
       sx={{
@@ -311,174 +335,84 @@ const HomePage: React.FC = () => {
             color: "#03045e",
           }}
         >
-          <Stack
-            direction={isMobile ? "column" : "row"}
-            alignItems="center"
-            justifyContent="space-around"
-            spacing={isMobile ? 2 : 4}
-          >
-            <Typography
-              variant="h6"
-              fontWeight="700"
-              textTransform="capitalize"
-              sx={{ color: "#0077b6", textAlign: isMobile ? "center" : "left" }}
+          {liveMatchInfo.matchType ? (
+            <Stack
+              direction={isMobile ? "column" : "row"}
+              alignItems="center"
+              justifyContent="space-around"
+              spacing={isMobile ? 2 : 4}
             >
-              🏏 Live {liveMatchInfo.matchType || "Match"}:
-            </Typography>
-
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Typography variant="h6" fontWeight="700">
-                {liveMatchInfo.team1.name || "-"}
-              </Typography>
-              <Avatar
-                src={liveMatchInfo.team1.logo}
-                alt="Team1 Logo"
-                sx={{ width: 28, height: 28, border: "2px solid #0077b6" }}
-              />
-              <Typography fontSize="1rem" fontWeight="600" color="#023e8a">
-                {liveMatchInfo.team1.runs}/{liveMatchInfo.team1.wickets}
-              </Typography>
               <Typography
-                variant="caption"
-                sx={{ fontStyle: "italic", color: "#0077b6" }}
+                variant="h6"
+                fontWeight="700"
+                textTransform="capitalize"
+                sx={{ color: "#0077b6", textAlign: isMobile ? "center" : "left" }}
               >
-                ({liveMatchInfo.team1.overs} overs)
+                🏏 Live {liveMatchInfo.matchType || "Match"}:
               </Typography>
-            </Stack>
-            <Typography
-              fontWeight={700}
-              variant="h5"
-              color="#0077b6"
-              sx={{ mx: 2 }}
-            >
-              vs
-            </Typography>
 
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Avatar
-                src={liveMatchInfo.team2.logo}
-                alt="Team2 Logo"
-                sx={{ width: 28, height: 28, border: "2px solid #0077b6" }}
-              />
-              <Typography variant="h6" fontWeight="700">
-                {liveMatchInfo.team2.name || "-"}
-              </Typography>
-              <Typography fontSize="1rem" fontWeight="600" color="#023e8a">
-                {liveMatchInfo.team2.runs}/{liveMatchInfo.team2.wickets}
-              </Typography>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography variant="h6" fontWeight="700">
+                  {liveMatchInfo.team1.name || "-"}
+                </Typography>
+                <Avatar
+                  src={liveMatchInfo.team1.logo}
+                  alt="Team1 Logo"
+                  sx={{ width: 28, height: 28, border: "2px solid #0077b6" }}
+                />
+                <Typography fontSize="1rem" fontWeight="600" color="#023e8a">
+                  {liveMatchInfo.team1.runs}/{liveMatchInfo.team1.wickets}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ fontStyle: "italic", color: "#0077b6" }}
+                >
+                  ({liveMatchInfo.team1.overs} overs)
+                </Typography>
+              </Stack>
               <Typography
-                variant="caption"
-                sx={{ fontStyle: "italic", color: "#0077b6" }}
+                fontWeight={700}
+                variant="h5"
+                color="#0077b6"
+                sx={{ mx: 2 }}
               >
-                ({liveMatchInfo.team2.overs} overs)
+                vs
               </Typography>
+
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Avatar
+                  src={liveMatchInfo.team2.logo}
+                  alt="Team2 Logo"
+                  sx={{ width: 28, height: 28, border: "2px solid #0077b6" }}
+                />
+                <Typography variant="h6" fontWeight="700">
+                  {liveMatchInfo.team2.name || "-"}
+                </Typography>
+                <Typography fontSize="1rem" fontWeight="600" color="#023e8a">
+                  {liveMatchInfo.team2.runs}/{liveMatchInfo.team2.wickets}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ fontStyle: "italic", color: "#0077b6" }}
+                >
+                  ({liveMatchInfo.team2.overs} overs)
+                </Typography>
+              </Stack>
             </Stack>
-          </Stack>
+          )
+
+            : (
+
+              <Typography
+                variant="h6"
+                fontWeight="700"
+                textTransform="capitalize"
+                sx={{ color: "#0077b6", textAlign: "center" }}
+              >
+                No live matches now, but stay tuned for updates!
+              </Typography>
+            )}
         </Paper>
-
-        <Box mt={6}>
-          <Typography
-            variant="h4"
-            fontWeight="700"
-            sx={{ color: "#0077b6", mb: 3, textAlign: "center" }}
-          >
-            What We Offer
-          </Typography>
-          <Grid container spacing={4} justifyContent="center">
-            {features.map(({ title, desc, icon }, i) => (
-              <Grid key={i} item xs={12} md={4}>
-                <Card
-                  sx={{
-                    height: "100%",
-                    backgroundColor: "#ade8f4",
-                    boxShadow: "0 4px 12px rgba(0, 119, 182, 0.2)",
-                    borderRadius: 3,
-                    transition: "transform 0.3s ease",
-                    "&:hover": {
-                      transform: "scale(1.05)",
-                      boxShadow: "0 8px 20px rgba(0, 119, 182, 0.35)",
-                    },
-                  }}
-                >
-                  <CardContent>
-                    <Typography
-                      variant="h5"
-                      sx={{ mb: 1.5 }}
-                      fontWeight={700}
-                      color="#0077b6"
-                      aria-label={`${title} icon`}
-                    >
-                      {icon} {title}
-                    </Typography>
-                    <Typography variant="body1" color="#03045e">
-                      {desc}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-
-        <Box mt={6}>
-          <Typography
-            variant="h4"
-            fontWeight="700"
-            sx={{ color: "#0077b6", mb: 3, textAlign: "center" }}
-          >
-            Cricket Gear & Equipment
-          </Typography>
-          <Grid container spacing={4} justifyContent="center">
-            {equipments.map(({ name, image }, i) => (
-              <Grid key={i} item xs={12} sm={6} md={4}>
-                <Card
-                  sx={{
-                    maxWidth: 340,
-                    mx: "auto",
-                    boxShadow: "0 8px 20px rgba(0, 119, 182, 0.25)",
-                    borderRadius: 4,
-                    cursor: "pointer",
-                    transition: "transform 0.3s ease",
-                    "&:hover": {
-                      transform: "scale(1.04)",
-                      boxShadow: "0 12px 30px rgba(0, 119, 182, 0.35)",
-                    },
-                  }}
-                  onClick={() => handleTeamClick({ name, image })}
-                  aria-label={`View details for ${name}`}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleTeamClick({ name, image });
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={image}
-                    alt={name}
-                    loading="lazy"
-                    sx={{
-                      height: 200,
-                      objectFit: "cover",
-                      borderTopLeftRadius: 16,
-                      borderTopRightRadius: 16,
-                    }}
-                  />
-                  <CardContent>
-                    <Typography
-                      variant="h6"
-                      textAlign="center"
-                      fontWeight={700}
-                      color="#0077b6"
-                    >
-                      {name}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
 
         <Box mt={6} mb={6}>
           <Typography
@@ -561,7 +495,7 @@ const HomePage: React.FC = () => {
             ))}
           </Grid>
         </Container>
-        <Container maxWidth="lg" sx={{ mt: 6 }}>
+        {playerOfTournament && <Container maxWidth="lg" sx={{ mt: 6 }}>
           <Typography
             variant={isMobile ? "h6" : "h4"}
             sx={{ color: "#0077b6", mb: 3, textAlign: "center" }}
@@ -569,65 +503,118 @@ const HomePage: React.FC = () => {
             Hero Of The Tournament
           </Typography>
           <PlayerCard player={playerOfTournament} />
-        </Container>
-        <Dialog
-          open={dialogOpen}
-          onClose={handleDialogClose}
-          aria-labelledby="team-dialog-title"
-          fullWidth
-          maxWidth="xs"
+        </Container>}
+        {dialogOpen && (
+          isLoading ? (
+            <LoadingScreen />
+          ) :
+            <PlayerDetailsCard selectedTeam={selectedTeam} handleDialogClose={handleDialogClose} />
+        )
+        }
+      </Container>
+      <Box mt={6}>
+        <Typography
+          variant="h4"
+          fontWeight="700"
+          sx={{ color: "#0077b6", mb: 3, textAlign: "center" }}
         >
-          <DialogTitle id="team-dialog-title">Team Details</DialogTitle>
-          <DialogContent dividers>
-            {isLoading ? (
-              <LoadingScreen />
-            ) : (
-              selectedTeam && (
-                <>
-                  {selectedTeam.logo && (
-                    <Box
-                      component="img"
-                      src={selectedTeam.logo}
-                      alt={selectedTeam.name}
-                      sx={{
-                        width: "100%",
-                        height: "auto",
-                        borderRadius: 2,
-                        mb: 2,
-                      }}
-                      loading="lazy"
-                    />
-                  )}
+          What We Offer
+        </Typography>
+        <Grid container spacing={4} justifyContent="center">
+          {features.map(({ title, desc, icon }, i) => (
+            <Grid key={i} item xs={12} md={4}>
+              <Card
+                sx={{
+                  height: "100%",
+                  backgroundColor: "#ade8f4",
+                  boxShadow: "0 4px 12px rgba(0, 119, 182, 0.2)",
+                  borderRadius: 3,
+                  transition: "transform 0.3s ease",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                    boxShadow: "0 8px 20px rgba(0, 119, 182, 0.35)",
+                  },
+                }}
+              >
+                <CardContent>
                   <Typography
-                    variant="h6"
+                    variant="h5"
+                    sx={{ mb: 1.5 }}
                     fontWeight={700}
                     color="#0077b6"
-                    textAlign="center"
-                    mb={1}
+                    aria-label={`${title} icon`}
                   >
-                    {selectedTeam.name}
+                    {icon} {title}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    color="#03045e"
-                    whiteSpace="pre-line"
-                    textAlign="center"
-                  >
-                    {selectedTeam.description ||
-                      "Young and energetic aggressive batsman✨"}
+                  <Typography variant="body1" color="#03045e">
+                    {desc}
                   </Typography>
-                </>
-              )
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleDialogClose} color="primary" autoFocus>
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Container>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
 
+      <Box mt={6}>
+        <Typography
+          variant="h4"
+          fontWeight="700"
+          sx={{ color: "#0077b6", mb: 3, textAlign: "center" }}
+        >
+          Cricket Gear & Equipment
+        </Typography>
+        <Grid container spacing={4} justifyContent="center">
+          {equipments.map(({ name, image }, i) => (
+            <Grid key={i} item xs={12} sm={6} md={4}>
+              <Card
+                sx={{
+                  maxWidth: 340,
+                  mx: "auto",
+                  boxShadow: "0 8px 20px rgba(0, 119, 182, 0.25)",
+                  borderRadius: 4,
+                  cursor: "pointer",
+                  transition: "transform 0.3s ease",
+                  "&:hover": {
+                    transform: "scale(1.04)",
+                    boxShadow: "0 12px 30px rgba(0, 119, 182, 0.35)",
+                  },
+                }}
+                onClick={() => handleTeamClick({ name, image })}
+                aria-label={`View details for ${name}`}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleTeamClick({ name, image });
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  image={image}
+                  alt={name}
+                  loading="lazy"
+                  sx={{
+                    height: 200,
+                    objectFit: "cover",
+                    borderTopLeftRadius: 16,
+                    borderTopRightRadius: 16,
+                  }}
+                />
+                <CardContent>
+                  <Typography
+                    variant="h6"
+                    textAlign="center"
+                    fontWeight={700}
+                    color="#0077b6"
+                  >
+                    {name}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
       <Box
         component="footer"
         sx={{

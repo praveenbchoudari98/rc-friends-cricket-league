@@ -4,12 +4,14 @@ import SportsCricketIcon from '@mui/icons-material/SportsCricket';
 import type { FirestoreDocument, Team } from '../../types';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { useNavigate } from 'react-router/dist';
 
 interface TeamsDisabledStateProps {
     teams: Team[];
 }
 
 const TeamsDisabledState = ({ teams }: TeamsDisabledStateProps) => {
+    const navigate = useNavigate();
     const exportCollectionToJSON = async (collectionName: string) => {
         try {
             const snapshot = await getDocs(collection(db, collectionName));
@@ -36,7 +38,7 @@ const TeamsDisabledState = ({ teams }: TeamsDisabledStateProps) => {
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {/* Registered Teams Section */}
-            <Box>
+            {/* <Box>
                 <Typography
                     variant="h5"
                     sx={{
@@ -109,7 +111,7 @@ const TeamsDisabledState = ({ teams }: TeamsDisabledStateProps) => {
                         </Paper>
                     ))}
                 </Box>
-            </Box>
+            </Box> */}
 
             {/* Disabled State Message */}
             <Paper
@@ -124,7 +126,14 @@ const TeamsDisabledState = ({ teams }: TeamsDisabledStateProps) => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 3
+                    gap: 3,
+                    marginTop: 4,
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                    transition: 'transform 0.2s ease-in-out',  
+                    '&:hover': {
+                        transform: 'scale(1.02)',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+                    }
                 }}
             >
                 <Box sx={{
@@ -201,8 +210,10 @@ const TeamsDisabledState = ({ teams }: TeamsDisabledStateProps) => {
                             color: '#FF8C00',
                             fontWeight: 500
                         }}
+                        onClick={() => navigate("/schedule")}
                     >
-                        Head over to the Schedule or Points Table to view tournament progress
+                        
+                        Head over to the Schedule page to view tournament progress
                     </Typography>
                 </Box>
             </Paper>

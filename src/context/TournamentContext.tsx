@@ -137,6 +137,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
         const updatedTournament = {
             ...tournament,
             matches,
+            matchesCompleted: 0,
             status: 'ongoing' as const,
             config: {
                 matchesPerTeamPair: config.matchesPerTeamPair

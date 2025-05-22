@@ -120,7 +120,7 @@ function PlayerCard({ player }) {
   );
 }
 
-function StatItem({ label, value }) {
+export function StatItem({ label, value }) {
   return (
     <Grid item xs={6}>
       <Box

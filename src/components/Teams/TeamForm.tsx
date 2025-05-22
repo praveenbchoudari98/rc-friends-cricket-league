@@ -26,8 +26,6 @@ interface TeamFormProps {
 
 export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [teamName, setTeamName] = useState("");
   const [previewImage, setPreviewImage] = useState<string>(PLAYER_AVATARS[0]);
   const [hasCustomImage, setHasCustomImage] = useState(false);
   const [nameError, setNameError] = useState("");
@@ -37,13 +35,7 @@ export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
 
   const [formData, setFormData] = useState({
     name: "",
-    captain: "",
-    coach: "",
-    city: "",
-    dob: "",
-    teamSize: "",
-    runsScored: "",
-    totalWins: "",
+    selfDescription: "",
     logo: PLAYER_AVATARS[0],
   });
   // Update preview avatar when team name changes
@@ -72,15 +64,8 @@ export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
     const team: Team = {
       id: generateUUID(),
       name: formData.name.trim(),
-      captain: formData.captain,
-      coach: formData.coach,
-      city: formData.city,
-      dob: formData.dob,
-      teamSize: parseInt(formData.teamSize),
-      runsScored: parseInt(formData.runsScored),
-      totalWins: parseInt(formData.totalWins),
-      logo: formData.logo,
-      players: [], // Optional: adjust as needed
+      selfDescription: formData.selfDescription.trim(),
+      logo: hasCustomImage ? formData.logo : previewImage,
     };
 
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -90,15 +75,11 @@ export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
     // Reset form
     setFormData({
       name: "",
-      captain: "",
-      coach: "",
-      city: "",
-      dob: "",
-      teamSize: "",
-      runsScored: "",
-      totalWins: "",
-      logo: PLAYER_AVATARS[0],
+      selfDescription: "",
+      logo: PLAYER_AVATARS[0]
     });
+    setPreviewImage(PLAYER_AVATARS[0]);
+    setIsSubmitting(false);
     setHasCustomImage(false);
     setNameError("");
   };
@@ -109,11 +90,12 @@ export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
     if (name === "name") {
       setNameError(getTeamNameError(teams, value));
       if (!hasCustomImage && !isProduction) {
+        updatePreviewAvatar(value);
         const tempId = value.toLowerCase().replace(/[^a-z0-9]/g, "");
         setFormData((prev) => ({ ...prev, logo: getTeamAvatar(tempId) }));
       }
     }
-  };
+  }
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (isProduction) return;
@@ -125,6 +107,7 @@ export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
         setHasCustomImage(true);
       };
       reader.readAsDataURL(file);
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
@@ -176,10 +159,10 @@ export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
           transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           ...(isSubmitting
             ? {
-                opacity: 0,
-                transform: "translateY(10px) scale(0.98)",
-                filter: "blur(4px)",
-              }
+              opacity: 0,
+              transform: "translateY(10px) scale(0.98)",
+              filter: "blur(4px)",
+            }
             : {}),
         }}
       >
@@ -216,9 +199,9 @@ export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
               bgcolor: "background.paper",
               "&:hover": !isProduction
                 ? {
-                    transform: "scale(1.05)",
-                    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-                  }
+                  transform: "scale(1.05)",
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+                }
                 : {},
             }}
             onClick={() => !isProduction && fileInputRef.current?.click()}
@@ -261,7 +244,7 @@ export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
 
         <TextField
           fullWidth
-          label="Team Name"
+          label="Player Name"
           name="name"
           value={formData.name}
           onChange={handleChange}
@@ -270,76 +253,16 @@ export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
           required
           margin="dense"
         />
-        <TextField
-          fullWidth
-          label="Captain"
-          name="captain"
-          value={formData.captain}
-          onChange={handleChange}
-          margin="dense"
-        />
-        <TextField
-          fullWidth
-          label="Coach"
-          name="coach"
-          value={formData.coach}
-          onChange={handleChange}
-          margin="dense"
-        />
-        <TextField
-          fullWidth
-          label="City"
-          name="city"
-          value={formData.city}
-          onChange={handleChange}
-          margin="dense"
-        />
-        <TextField
-          fullWidth
-          label="Date of Birth"
-          name="dob"
-          type="date"
-          value={formData.dob}
-          InputLabelProps={{ shrink: true }}
-          onChange={handleChange}
-          margin="dense"
-        />
-        <TextField
-          fullWidth
-          label="Team Size"
-          name="teamSize"
-          type="number"
-          value={formData.teamSize}
-          onChange={handleChange}
-          margin="dense"
-        />
-        <TextField
-          fullWidth
-          label="Total Runs Scored"
-          name="runsScored"
-          type="number"
-          value={formData.runsScored}
-          onChange={handleChange}
-          margin="dense"
-        />
-        <TextField
-          fullWidth
-          label="Total Wins"
-          name="totalWins"
-          type="number"
-          value={formData.totalWins}
-          onChange={handleChange}
-          margin="dense"
-        />
-        <TextField
-          fullWidth
-          label="Logo URL"
-          name="logo"
-          value={formData.logo}
-          onChange={handleChange}
-          margin="dense"
-        />
 
+        <TextField
+          fullWidth
+          label="How do you describe yourself?"
+          name="selfDescription"
+          value={formData.selfDescription}
+          onChange={handleChange}
+          required
+          margin="dense"
+        />
         <Button
           type="submit"
           variant="contained"
@@ -372,5 +295,5 @@ export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
         </Button>
       </Box>
     </Paper>
-  );
+  )
 };
