@@ -11,6 +11,7 @@ import {
   AccordionDetails,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { getFormattedPerformance } from "../utils/matchUtils";
 
 function PlayerCard({ player }) {
   return (
@@ -113,6 +114,8 @@ function PlayerCard({ player }) {
             <StatItem label="Wickets" value={player?.wicketsTaken} />
             <StatItem label="Net Run Rate" value={player?.nrr} />
             <StatItem label="Points" value={player?.points} />
+            <StatItem label="Best Batting" value={getFormattedPerformance(player?.bestBattingPerformance, 'batting')} />
+            <StatItem label="Best Bowling" value={getFormattedPerformance(player?.bestBowlingPerformance, 'bowling')} />
           </Grid>
         </AccordionDetails>
       </Accordion>

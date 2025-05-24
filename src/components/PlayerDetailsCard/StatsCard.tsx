@@ -1,4 +1,3 @@
-import React from 'react';
 import {
     Box,
     Typography,
@@ -6,15 +5,15 @@ import {
     Paper,
     LinearProgress,
 } from '@mui/material';
-import SportsCricketIcon from '@mui/icons-material/SportsCricket';
-import { TeamStats } from "../../types";
+import { Performance, TeamStats } from "../../types";
+import { getFormattedPerformance } from '../../utils/matchUtils';
 
 
 interface DynamicStatsTableProps {
     playerStats: TeamStats;
 }
 
-const StatCard = ({ label, value }: { label: string; value: string | number }) => {
+const StatCard = ({ label, value, formattedValue }: { label: string; value?: string | number, formattedValue?: React.ReactNode; }) => {
     return (
         <Paper
             elevation={3}
@@ -40,11 +39,31 @@ const StatCard = ({ label, value }: { label: string; value: string | number }) =
                 {label}
             </Typography>
             <Typography variant="h6" fontWeight="bold" color="orange">
-                {value}
+                {formattedValue ?? value ?? "-"}
             </Typography>
         </Paper>
     );
 };
+
+
+const formatPerformance = (perf: Performance, type: string): React.ReactNode => {
+    if (!perf) return "-";
+
+    const score = getFormattedPerformance(perf, type);
+    const opponentName = perf.opponent.split(" ")[0]; // Extract first nam
+
+    return (
+        <div style={{ textAlign: "center" }}>
+            <div style={{ fontWeight: "bold", fontSize: "1.25rem", color: "#ff9800" }}>
+                {score}
+            </div>
+            <div style={{ fontSize: "0.75rem", fontStyle: "italic", color: "#777" }}>
+                vs {opponentName}
+            </div>
+        </div>
+    );
+};
+
 
 const PlayerSummaryStats = ({ playerStats }: DynamicStatsTableProps) => {
     const {
@@ -57,12 +76,17 @@ const PlayerSummaryStats = ({ playerStats }: DynamicStatsTableProps) => {
         oversPlayed,
         oversBowled,
         wicketsTaken,
+        numOfFiftyPlusScores,
+        numofFivePlusWickets,
+        bestBattingPerformance,
+        bestBowlingPerformance
     } = playerStats;
 
     const winRate = matches ? ((wins / matches) * 100).toFixed(1) : '0';
     const runRate = oversPlayed ? (runsScored / oversPlayed).toFixed(2) : '-';
     const economy = oversBowled ? (runsConceded / oversBowled).toFixed(2) : '-';
     const avgWickets = matches ? (wicketsTaken / matches).toFixed(2) : '-';
+
 
     return (
         <Box p={2}>
@@ -94,6 +118,27 @@ const PlayerSummaryStats = ({ playerStats }: DynamicStatsTableProps) => {
                 <Grid item xs={6} sm={4}>
                     <StatCard label="Economy" value={economy} />
                 </Grid>
+                <Grid item xs={6} sm={4}>
+                    <StatCard label="50+ Scores" value={numOfFiftyPlusScores} />
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                    <StatCard label="5+ Wickets" value={numofFivePlusWickets} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <StatCard
+                        label="Best Batting"
+                        formattedValue={formatPerformance(bestBattingPerformance, 'batting')}
+                    />
+
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <StatCard
+                        label="Best Bowling"
+                        formattedValue={formatPerformance(bestBowlingPerformance, 'bowling')}
+                    />
+                </Grid>
+
+
             </Grid>
 
             <Box mt={4}>

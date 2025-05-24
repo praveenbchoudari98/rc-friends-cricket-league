@@ -106,7 +106,7 @@ const computeMetrics = ({
 
 const normalize = (val, max) => max ? val / max : 0;
 
-const computeBestPlayer = (players:TeamStats[]) => {
+const computeBestPlayer = (players: TeamStats[]) => {
   const playerMetrics = players.map(player => ({
     original: player,
     ...computeMetrics(player),
@@ -235,18 +235,39 @@ const HomePage: React.FC = () => {
     setSelectedTeam(null);
   };
   const getMobileOS = (): 'iOS' | 'Android' | 'Other' => {
-    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
 
-    if (/android/i.test(userAgent)) return 'Android';
-    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) return 'iOS';
+    const isTouchDevice =
+      'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    const isSmallScreen =
+      window.innerWidth <= 768 || window.innerHeight <= 768;
+
+    // iOS detection
+    const isiOS =
+      (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) &&
+      !window.MSStream;
+
+    // Android detection
+    const isAndroid = /android/i.test(ua);
+
+    if ((isAndroid || (ua.includes('Linux') && isTouchDevice)) && isSmallScreen) {
+      return 'Android';
+    }
+
+    if (isiOS && isSmallScreen) {
+      return 'iOS';
+    }
+
     return 'Other';
   };
+
+
 
 
   const handlePlayNow = () => {
     const os = getMobileOS();
 
-    const deepLink = 'rc24://app/play';
     const androidStoreLink = 'https://play.google.com/store/apps/details?id=com.nautilus.realcricket&hl=en_IN&gl=US';
     const iosStoreLink = 'https://apps.apple.com/in/app/real-cricket-24/id1577721431';
 
@@ -258,7 +279,7 @@ const HomePage: React.FC = () => {
       window.location.href = iosStoreLink
     } else {
       // Fallback for unsupported platforms
-      window.open(deepLink, '_blank');
+      window.open(androidStoreLink, '_blank');
     }
   };
 
@@ -413,6 +434,7 @@ const HomePage: React.FC = () => {
             <Typography fontWeight="bold" fontSize="1rem">
               Play Now
             </Typography>
+            <PlayArrowIcon />
           </Button>
         </Box>
 

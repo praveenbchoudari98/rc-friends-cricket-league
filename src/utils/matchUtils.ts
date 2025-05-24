@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import type { Match, Team } from '../types';
+import type { Match, Performance, Team } from '../types';
 
 export const getVictoryMargin = (match: Match): string => {
     if (!match.result) {
@@ -66,3 +66,13 @@ export const getSortedMatchData = (matches: Match[]): Match[] => {
         return toMillis(b.date) - toMillis(a.date); // Most recent first
     });
 }
+
+export const getFormattedPerformance = (perf: Performance, type: string): string => {
+    if (!perf) return "-";
+
+    const { runs, wickets, overs } = perf;
+
+    return type === 'batting'
+        ? `${runs}/${wickets} (${overs})`
+        : `${wickets}/${runs} (${overs})`;
+};

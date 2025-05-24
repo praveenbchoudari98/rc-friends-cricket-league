@@ -54,6 +54,12 @@ export interface Match {
     isSuperDuperOver?: boolean;
     inningsInfo?: InningsInfo;
 }
+export interface Performance {
+    runs: number;
+    wickets: number;
+    overs: number;
+    opponent: string;
+}
 
 export interface TeamStats {
     team: Team;
@@ -69,6 +75,10 @@ export interface TeamStats {
     oversPlayed: number;
     oversBowled: number;
     wicketsTaken: number;
+    numOfFiftyPlusScores: number;
+    numofFivePlusWickets: number;
+    bestBattingPerformance?: Performance;
+    bestBowlingPerformance?: Performance;
 }
 
 export interface Tournament {
