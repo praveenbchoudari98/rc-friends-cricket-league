@@ -26,28 +26,31 @@ import { db } from '../../config/firebase';
 import { FirestoreDocument } from '../../types';
 
 export const About = () => {
-    const exportCollectionToJSON = async (collectionName: string) => {
-        try {
-            const snapshot = await getDocs(collection(db, collectionName));
-            const data: FirestoreDocument[] = [];
+//     // Environment check for production
+//     const isProduction = process.env.NODE_ENV === 'production';
+//     // Function to export Firestore collection to JSON
+//     const exportCollectionToJSON = async (collectionName: string) => {
+//         try {
+//             const snapshot = await getDocs(collection(db, collectionName));
+//             const data: FirestoreDocument[] = [];
 
-            snapshot.forEach(doc => {
-                data.push({ id: doc.id, ...doc.data() });
-            });
+//             snapshot.forEach(doc => {
+//                 data.push({ id: doc.id, ...doc.data() });
+//             });
 
-            // Convert to JSON and trigger download
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${collectionName}_backup.json`;
-            link.click();
+//             // Convert to JSON and trigger download
+//             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+//             const url = URL.createObjectURL(blob);
+//             const link = document.createElement('a');
+//             link.href = url;
+//             link.download = `${collectionName}_backup.json`;
+//             link.click();
 
-            console.log(`✅ Exported ${data.length} docs from ${collectionName}`);
-        } catch (error) {
-            console.error('❌ Error exporting collection:', error);
-        }
-    }
+//             console.log(`✅ Exported ${data.length} docs from ${collectionName}`);
+//         } catch (error) {
+//             console.error('❌ Error exporting collection:', error);
+//         }
+//     }
     return (
         <Container maxWidth="md">
             <Box sx={{ py: 4 }}>
@@ -221,26 +224,6 @@ export const About = () => {
                         </ListItem>
                     </List>
                 </Paper>
-                <button
-
-                    onClick={() => exportCollectionToJSON('tournaments')}
-                    style={{
-                        padding: "12px 24px",
-                        fontSize: "16px",
-                        backgroundColor: "#007bff",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                        transition: "background-color 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#0056b3")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#007bff")}
-                >
-                    Download Firestore JSON
-                </button>
-
             </Box>
         </Container>
     );

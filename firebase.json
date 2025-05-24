@@ -35,8 +35,5 @@
         "destination": "/index.html"
       }
     ]
-  },
-  "storage": {
-    "rules": "cors.json"
   }
 }

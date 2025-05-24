@@ -30,6 +30,9 @@ import { Team, TeamStats } from "../types";
 import PlayerDetailsCard from "../components/PlayerDetailsCard/PlayerDetailsCard";
 import { LoadingScreen } from "../components/LoadingScreen";
 import PlayerCard from "./PlayerCard";
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import logo from '../assets/logo.png';
+import { min } from "cypress/types/lodash";
 
 // Carousel images
 const carouselImages = [RC24, MIRC24, RCControl];
@@ -89,34 +92,54 @@ const floatAnimation = {
   rotate: [0, 15, -15, 20, 0],
 };
 
-function calculatePPS(player, maxValues) {
-  const winRatio = player.matches ? player.wins / player.matches : 0;
-  const runRate = player.oversPlayed ? player.runsScored / player.oversPlayed : 0;
-  const economy = player.oversBowled ? player.runsConceded / player.oversBowled : maxValues.maxEconomy;
-  const wicketsPerMatch = player.matches ? player.wicketsTaken / player.matches : 0;
-  const normalizedRuns = player.runsScored / maxValues.maxRuns;
+const computeMetrics = ({
+  matches, wins, runsScored, runsConceded,
+  oversPlayed, oversBowled, wicketsTaken
+}) => {
+  const runRate = oversPlayed ? runsScored / oversPlayed : 0;
+  const economy = oversBowled ? runsConceded / oversBowled : 0;
+  const nrr = oversPlayed && oversBowled
+    ? (runsScored / oversPlayed) - (runsConceded / oversBowled)
+    : 0;
+  return { runRate, economy, nrr };
+};
 
-  const PPS = 
-    (winRatio * 20) +
-    (normalizedRuns * 15) +
-    (runRate * 5) +
-    (wicketsPerMatch * 20) +
-    ((maxValues.maxEconomy - economy) * 10);
+const normalize = (val, max) => max ? val / max : 0;
 
-  return PPS;
-}
+const computeBestPlayer = (players:TeamStats[]) => {
+  const playerMetrics = players.map(player => ({
+    original: player,
+    ...computeMetrics(player),
+  }));
 
-function determineBestPlayer(players) {
-  const maxRuns = Math.max(...players.map(p => p.runsScored));
-  const maxEconomy = Math.max(...players.map(p => p.oversBowled ? p.runsConceded / p.oversBowled : 0));
+  const max = {
+    runsScored: Math.max(...players.map(p => p.runsScored)),
+    runRate: Math.max(...playerMetrics.map(p => p.runRate)),
+    runsConceded: Math.max(...players.map(p => p.runsConceded)),
+    economy: Math.max(...playerMetrics.map(p => p.economy)),
+    wicketsTaken: Math.max(...players.map(p => p.wicketsTaken)),
+    wins: Math.max(...players.map(p => p.wins)),
+    nrr: Math.max(...playerMetrics.map(p => p.nrr)),
+  };
 
-  return players
-    .map(p => ({
-      ...p,
-      pps: calculatePPS(p, { maxRuns, maxEconomy })
-    }))
-    .sort((a, b) => b.pps - a.pps)[0];
-}
+  const scored = playerMetrics.map(p => ({
+    ...p,
+    pes: (
+      normalize(p.original.runsScored, max.runsScored) * 15 +
+      normalize(p.runRate, max.runRate) * 15 +
+      (1 - normalize(p.original.runsConceded, max.runsConceded)) * 10 +
+      (1 - normalize(p.economy, max.economy)) * 15 +
+      normalize(p.original.wicketsTaken, max.wicketsTaken) * 20 +
+      normalize(p.original.wins, max.wins) * 15 +
+      normalize(p.nrr, max.nrr) * 10
+    )
+  }));
+
+  const best = scored.sort((a, b) => b.pes - a.pes)[0];
+
+  return best.original;
+};
+
 
 
 
@@ -139,6 +162,7 @@ const HomePage: React.FC = () => {
     team2: { runs: "", wickets: "", overs: "", name: "", logo: "" },
     matchType: "",
   });
+  const [bestPlayer, setBestPlayer] = useState(null);
 
   const { tournament } = useTournamentContext();
 
@@ -186,10 +210,10 @@ const HomePage: React.FC = () => {
         { label: "Runs Recorded", value: runsScored },
         { label: "Wickets Tracked", value: wicketsTaken },
       ]);
+      setBestPlayer(computeBestPlayer(pointsTable));
     }
   }, [tournament]);
 
-  const playerOfTournament = determineBestPlayer(tournament.pointsTable);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 8000);
@@ -210,6 +234,35 @@ const HomePage: React.FC = () => {
     setDialogOpen(false);
     setSelectedTeam(null);
   };
+  const getMobileOS = (): 'iOS' | 'Android' | 'Other' => {
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+
+    if (/android/i.test(userAgent)) return 'Android';
+    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) return 'iOS';
+    return 'Other';
+  };
+
+
+  const handlePlayNow = () => {
+    const os = getMobileOS();
+
+    const deepLink = 'rc24://app/play';
+    const androidStoreLink = 'https://play.google.com/store/apps/details?id=com.nautilus.realcricket&hl=en_IN&gl=US';
+    const iosStoreLink = 'https://apps.apple.com/in/app/real-cricket-24/id1577721431';
+
+    if (os === 'Android') {
+      // Android intent or custom URL scheme
+      window.location.href = androidStoreLink;
+    } else if (os === 'iOS') {
+      // iOS custom URL scheme
+      window.location.href = iosStoreLink
+    } else {
+      // Fallback for unsupported platforms
+      window.open(deepLink, '_blank');
+    }
+  };
+
+
 
   return (
     <Box
@@ -294,7 +347,10 @@ const HomePage: React.FC = () => {
                 }}
                 loading="lazy"
               />
+
+
             </Box>
+
           ))}
         </Slider>
 
@@ -323,6 +379,42 @@ const HomePage: React.FC = () => {
           A unified platform for live cricket scores, global coverage,
           analytics, and cricket passion.
         </Typography>
+        <Box display="flex" justifyContent="center" mt={3}>
+          <Button
+            onClick={handlePlayNow}
+            variant="contained"
+            sx={{
+              background: "linear-gradient(135deg, #d2f1ff, #a8e4ff)",
+              color: "#004c74",
+              m: 5,
+              borderRadius: "20px",
+              boxShadow: "0 4px 10px rgba(0, 123, 255, 0.15)",
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: "1rem",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              '&:hover': {
+                background: "linear-gradient(135deg, #c0eaff, #90d8ff)",
+                transform: "scale(1.03)",
+                boxShadow: "0 6px 16px rgba(0, 123, 255, 0.25)"
+              },
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              maxWidth: 300,
+            }}
+          >
+            <Box
+              component="img"
+              src={logo}
+              alt="RC24"
+              sx={{ width: 24, height: 24, borderRadius: "50%" }}
+            />
+            <Typography fontWeight="bold" fontSize="1rem">
+              Play Now
+            </Typography>
+          </Button>
+        </Box>
 
         <Paper
           elevation={3}
@@ -495,14 +587,14 @@ const HomePage: React.FC = () => {
             ))}
           </Grid>
         </Container>
-        {playerOfTournament && <Container maxWidth="lg" sx={{ mt: 6 }}>
+        {bestPlayer && <Container maxWidth="lg" sx={{ mt: 6 }}>
           <Typography
             variant={isMobile ? "h6" : "h4"}
             sx={{ color: "#0077b6", mb: 3, textAlign: "center" }}
           >
             Hero Of The Tournament
           </Typography>
-          <PlayerCard player={playerOfTournament} />
+          <PlayerCard player={bestPlayer} />
         </Container>}
         {dialogOpen && (
           isLoading ? (
