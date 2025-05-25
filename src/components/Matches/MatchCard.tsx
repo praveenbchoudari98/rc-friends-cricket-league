@@ -25,7 +25,7 @@ import { ScoreboardUploader } from '../ScoreboardUploader';
 import { format } from 'date-fns';
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
-import { getFormattedDate, getVictoryMargin } from '../../utils/matchUtils';
+import { getFormattedDate, getTeamLogo, getVictoryMargin } from '../../utils/matchUtils';
 import { useTournamentContext } from '../../context/TournamentContext';
 
 interface MatchCardProps {
@@ -62,7 +62,7 @@ const TeamScore = ({ team, score, isCompleted }: TeamScoreProps) => (
     }}>
         <Box
             component="img"
-            src={team.logo}
+            src={getTeamLogo(team.id)}
             alt={team.name}
             sx={{
                 width: 36,
@@ -822,7 +822,7 @@ export const MatchCard = ({
                             }}>
                                 <Box
                                     component="img"
-                                    src={match.team1.logo}
+                                    src={getTeamLogo(match.team1.id)}
                                     alt={match.team1.name}
                                     sx={{
                                         width: 120,
@@ -894,7 +894,7 @@ export const MatchCard = ({
                             }}>
                                 <Box
                                     component="img"
-                                    src={match.team2.logo}
+                                    src={getTeamLogo(match.team2.id)}
                                     alt={match.team2.name}
                                     sx={{
                                         width: 120,

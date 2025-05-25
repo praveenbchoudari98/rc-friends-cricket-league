@@ -15,6 +15,7 @@ import { Celebration as CelebrationIcon } from '@mui/icons-material';
 import type { Match, Team, TeamStats, MatchType, MatchStatus, TournamentStage } from '../../types';
 import { MatchCard as MatchCardComponent } from '../Matches/MatchCard';
 import { useWindowSize } from "@react-hook/window-size";
+import { getTeamLogo } from '../../utils/matchUtils';
 
 interface KnockoutStageProps {
     matches: Match[];
@@ -527,7 +528,7 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
                             {/* Team Logo */}
                             <Box
                                 component="img"
-                                src={team.logo}
+                                src={getTeamLogo(team.id)}
                                 alt={team.name}
                                 sx={{
                                     width: 120,

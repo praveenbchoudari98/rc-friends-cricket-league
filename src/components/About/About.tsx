@@ -29,28 +29,28 @@ export const About = () => {
 //     // Environment check for production
 //     const isProduction = process.env.NODE_ENV === 'production';
 //     // Function to export Firestore collection to JSON
-//     const exportCollectionToJSON = async (collectionName: string) => {
-//         try {
-//             const snapshot = await getDocs(collection(db, collectionName));
-//             const data: FirestoreDocument[] = [];
+    // const exportCollectionToJSON = async (collectionName: string) => {
+    //     try {
+    //         const snapshot = await getDocs(collection(db, collectionName));
+    //         const data: FirestoreDocument[] = [];
 
-//             snapshot.forEach(doc => {
-//                 data.push({ id: doc.id, ...doc.data() });
-//             });
+    //         snapshot.forEach(doc => {
+    //             data.push({ id: doc.id, ...doc.data() });
+    //         });
 
-//             // Convert to JSON and trigger download
-//             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-//             const url = URL.createObjectURL(blob);
-//             const link = document.createElement('a');
-//             link.href = url;
-//             link.download = `${collectionName}_backup.json`;
-//             link.click();
+    //         // Convert to JSON and trigger download
+    //         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    //         const url = URL.createObjectURL(blob);
+    //         const link = document.createElement('a');
+    //         link.href = url;
+    //         link.download = `${collectionName}_backup.json`;
+    //         link.click();
 
-//             console.log(`✅ Exported ${data.length} docs from ${collectionName}`);
-//         } catch (error) {
-//             console.error('❌ Error exporting collection:', error);
-//         }
-//     }
+    //         console.log(`✅ Exported ${data.length} docs from ${collectionName}`);
+    //     } catch (error) {
+    //         console.error('❌ Error exporting collection:', error);
+    //     }
+    // }
     return (
         <Container maxWidth="md">
             <Box sx={{ py: 4 }}>
@@ -225,6 +225,12 @@ export const About = () => {
                     </List>
                 </Paper>
             </Box>
+                        {/* <button
+                            
+                            onClick={() => exportCollectionToJSON('tournaments')}
+                        >
+                            Export Matches
+                        </button> */}
         </Container>
     );
 }; 

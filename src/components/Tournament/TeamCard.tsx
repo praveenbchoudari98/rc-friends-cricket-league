@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { EmojiEvents as TrophyIcon } from '@mui/icons-material';
 import type { Team } from '../../types';
+import { getTeamLogo } from '../../utils/matchUtils';
 
 // Array of cricket player avatar variations with different roles and colors
 export const PLAYER_AVATARS = [
@@ -69,7 +70,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
     >
         <Box
             component="img"
-            src={team?.logo || (team?.id ? getTeamAvatar(team.id) : PLAYER_AVATARS[0])}
+            src={getTeamLogo(team.id) || (team?.id ? getTeamAvatar(team.id) : PLAYER_AVATARS[0])}
             alt={team?.name || 'Team Logo'}
             sx={{
                 width: 36,

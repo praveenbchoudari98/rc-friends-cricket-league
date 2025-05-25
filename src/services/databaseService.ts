@@ -79,7 +79,7 @@ export const databaseService = {
         try {
             const tournamentRef = doc(db, 'tournaments', tournamentId);
             const tournamentSnap = await getDoc(tournamentRef);
-            
+
             if (!tournamentSnap.exists()) {
                 throw new Error('Tournament not found');
             }
@@ -88,7 +88,7 @@ export const databaseService = {
                 ...tournamentSnap.data(),
                 id: tournamentSnap.id
             } as Tournament;
-            
+
             const matchIndex = tournament.matches.findIndex(m => m.id === match.id);
 
             if (matchIndex === -1) {
@@ -108,7 +108,7 @@ export const databaseService = {
         try {
             const tournamentRef = doc(db, 'tournaments', tournamentId);
             const tournamentSnap = await getDoc(tournamentRef);
-            
+
             if (!tournamentSnap.exists()) {
                 throw new Error('Tournament not found');
             }
@@ -117,7 +117,7 @@ export const databaseService = {
                 ...tournamentSnap.data(),
                 id: tournamentSnap.id
             } as Tournament;
-            
+
             tournament.teams.push(team);
             await updateDoc(tournamentRef, { teams: tournament.teams });
         } catch (error) {
@@ -130,7 +130,7 @@ export const databaseService = {
         try {
             const tournamentRef = doc(db, 'tournaments', tournamentId);
             const tournamentSnap = await getDoc(tournamentRef);
-            
+
             if (!tournamentSnap.exists()) {
                 throw new Error('Tournament not found');
             }
@@ -139,7 +139,7 @@ export const databaseService = {
                 ...tournamentSnap.data(),
                 id: tournamentSnap.id
             } as Tournament;
-            
+
             tournament.teams = tournament.teams.filter(team => team.id !== teamId);
             await updateDoc(tournamentRef, { teams: tournament.teams });
         } catch (error) {

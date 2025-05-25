@@ -31,7 +31,7 @@ export default function TeamsView() {
                         teams={tournament.teams}
                     />
                     <TeamList 
-                        teams={tournament.teams} 
+                        teams={tournament.teamDetails} 
                         onRemoveTeam={handleRemoveTeam}
                     />
                 </>

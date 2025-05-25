@@ -7,10 +7,10 @@ import {
     Grid as MuiGrid,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import type { Team } from '../../types';
+import type { TeamDetails } from '../../types';
 
 interface TeamListProps {
-    teams: Team[];
+    teams: TeamDetails[];
     onRemoveTeam: (id: string) => void;
 }
 

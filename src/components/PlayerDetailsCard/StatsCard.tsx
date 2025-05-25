@@ -86,57 +86,48 @@ const PlayerSummaryStats = ({ playerStats }: DynamicStatsTableProps) => {
     const runRate = oversPlayed ? (runsScored / oversPlayed).toFixed(2) : '-';
     const economy = oversBowled ? (runsConceded / oversBowled).toFixed(2) : '-';
     const avgWickets = matches ? (wicketsTaken / matches).toFixed(2) : '-';
+    const stats = [
+        { label: "Matches", value: matches },
+        { label: "Wins", value: wins },
+        { label: "Ties", value: ties },
+        { label: "Losses", value: losses },
+        { label: "Runs Scored", value: runsScored },
+        { label: "Run Rate", value: runRate },
+        { label: "Wickets Taken", value: wicketsTaken },
+        { label: "Avg Wickets/Match", value: avgWickets },
+        { label: "Economy", value: economy },
+        { label: "50+ Scores", value: numOfFiftyPlusScores },
+        { label: "5+ Wickets", value: numofFivePlusWickets },
+    ];
+
+
 
 
     return (
         <Box p={2}>
             <Grid container spacing={2}>
-                <Grid item xs={6} sm={4}>
-                    <StatCard label="Matches" value={matches} />
+                {stats
+                    .filter(stat => Number(stat.value) > 0)
+                    .map((stat, index) => (
+                        <Grid item xs={6} sm={4} key={index}>
+                            <StatCard label={stat.label} value={stat.value} />
+                        </Grid>
+                    ))}
+                <Grid container spacing={2} sx={{ mt: 2 }}>
+                    <Grid item xs={12} sm={6}>
+                        <StatCard
+                            label="Best Batting"
+                            formattedValue={formatPerformance(bestBattingPerformance, 'batting')}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <StatCard
+                            label="Best Bowling"
+                            formattedValue={formatPerformance(bestBowlingPerformance, 'bowling')}
+                        />
+                    </Grid>
                 </Grid>
-                <Grid item xs={6} sm={4}>
-                    <StatCard label="Wins" value={wins} />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                    <StatCard label="Ties" value={ties} />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                    <StatCard label="Losses" value={losses} />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                    <StatCard label="Runs Scored" value={runsScored} />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                    <StatCard label="Run Rate" value={runRate} />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                    <StatCard label="Wickets Taken" value={wicketsTaken} />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                    <StatCard label="Avg Wickets/Match" value={avgWickets} />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                    <StatCard label="Economy" value={economy} />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                    <StatCard label="50+ Scores" value={numOfFiftyPlusScores} />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                    <StatCard label="5+ Wickets" value={numofFivePlusWickets} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <StatCard
-                        label="Best Batting"
-                        formattedValue={formatPerformance(bestBattingPerformance, 'batting')}
-                    />
 
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <StatCard
-                        label="Best Bowling"
-                        formattedValue={formatPerformance(bestBowlingPerformance, 'bowling')}
-                    />
-                </Grid>
 
 
             </Grid>

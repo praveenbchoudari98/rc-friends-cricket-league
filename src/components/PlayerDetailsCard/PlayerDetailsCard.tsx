@@ -5,6 +5,7 @@ import {
 import { TeamStats } from "../../types";
 import PlayerSummaryStats from "./StatsCard";
 import './FlipStyles.css'; // 👈 Include the CSS file
+import { getTeamLogo } from "../../utils/matchUtils";
 
 interface PlayerDetailsCardProps {
   selectedTeam: TeamStats;
@@ -30,10 +31,10 @@ const PlayerDetailsCard = ({ selectedTeam, handleDialogClose }: PlayerDetailsCar
 
               {/* Front - Image View */}
               <Box className="front">
-                {selectedTeam.team.logo && (
+                {selectedTeam.team.id && (
                   <Box
                     component="img"
-                    src={selectedTeam.team.logo}
+                    src={getTeamLogo(selectedTeam.team.id)}
                     alt={selectedTeam.team.name}
                     sx={{
                       width: "100%",

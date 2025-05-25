@@ -1,5 +1,6 @@
 import { Box, Typography, Paper, useTheme } from '@mui/material';
 import type { TeamStats } from '../../types';
+import { getTeamLogo } from '../../utils/matchUtils';
 
 interface PointsTableProps {
     stats: TeamStats[];
@@ -142,7 +143,7 @@ export const PointsTable = ({ stats }: PointsTableProps) => {
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                                 <Box
                                                     component="img"
-                                                    src={stat.team.logo}
+                                                    src={getTeamLogo(stat.team.id)}
                                                     alt={stat.team.name}
                                                     sx={{
                                                         width: 40,

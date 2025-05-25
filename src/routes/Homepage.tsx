@@ -33,6 +33,7 @@ import PlayerCard from "./PlayerCard";
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import logo from '../assets/logo.png';
 import { min } from "cypress/types/lodash";
+import { getTeamLogo } from "../utils/matchUtils";
 
 // Carousel images
 const carouselImages = [RC24, MIRC24, RCControl];
@@ -158,8 +159,8 @@ const HomePage: React.FC = () => {
     { label: "Wickets Tracked", value: 1140 },
   ]);
   const [liveMatchInfo, setLiveMatchInfo] = useState({
-    team1: { name: "", runs: "", wickets: "", overs: "", logo: "" },
-    team2: { runs: "", wickets: "", overs: "", name: "", logo: "" },
+    team1: { name: "", runs: "", wickets: "", overs: "", id: "" },
+    team2: { runs: "", wickets: "", overs: "", name: "", id: "" },
     matchType: "",
   });
   const [bestPlayer, setBestPlayer] = useState(null);
@@ -194,14 +195,14 @@ const HomePage: React.FC = () => {
           runs: recentMatch?.result?.team1Score.runs,
           wickets: recentMatch?.result?.team1Score.wickets,
           overs: recentMatch?.result?.team1Score.overs,
-          logo: recentMatch?.team1?.logo,
+          id: recentMatch?.team1?.id,
         },
         team2: {
           name: recentMatch?.team2?.name,
           runs: recentMatch?.result?.team2Score.runs,
           wickets: recentMatch?.result?.team2Score.wickets,
-          overs: recentMatch?.result?.team2Score.overs,
-          logo: recentMatch?.team2?.logo,
+          overs: recentMatch?.result?.team2Score.overs, 
+          id: recentMatch?.team2?.id,
         },
         matchType: recentMatch?.matchType,
       });
@@ -470,7 +471,7 @@ const HomePage: React.FC = () => {
                   {liveMatchInfo.team1.name || "-"}
                 </Typography>
                 <Avatar
-                  src={liveMatchInfo.team1.logo}
+                  src={getTeamLogo(liveMatchInfo.team1.id)}
                   alt="Team1 Logo"
                   sx={{ width: 28, height: 28, border: "2px solid #0077b6" }}
                 />
@@ -495,7 +496,7 @@ const HomePage: React.FC = () => {
 
               <Stack direction="row" alignItems="center" spacing={1}>
                 <Avatar
-                  src={liveMatchInfo.team2.logo}
+                  src={getTeamLogo(liveMatchInfo.team2.id)}
                   alt="Team2 Logo"
                   sx={{ width: 28, height: 28, border: "2px solid #0077b6" }}
                 />
@@ -593,7 +594,7 @@ const HomePage: React.FC = () => {
                   >
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Avatar
-                        src={team.logo}
+                        src={getTeamLogo(team.id)}
                         alt={team.name}
                         sx={{ width: 56, height: 56 }}
                       />

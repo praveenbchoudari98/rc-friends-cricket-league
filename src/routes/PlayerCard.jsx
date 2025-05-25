@@ -11,7 +11,7 @@ import {
   AccordionDetails,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { getFormattedPerformance } from "../utils/matchUtils";
+import { getFormattedPerformance, getTeamLogo } from "../utils/matchUtils";
 
 function PlayerCard({ player }) {
   return (
@@ -67,7 +67,7 @@ function PlayerCard({ player }) {
           >
             <CardMedia
               component="img"
-              image={player?.team.logo}
+              image={getTeamLogo(player?.team.id)}
               alt={`${player?.team.name} Logo`}
               sx={{
                 width: 100,

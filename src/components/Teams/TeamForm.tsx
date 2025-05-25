@@ -10,7 +10,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import type { Team } from "../../types";
+import type { Team, TeamDetails } from "../../types";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import { getTeamNameError } from "../../utils/validation";
 import { PLAYER_AVATARS, getTeamAvatar } from "../Tournament/TeamCard";
@@ -61,7 +61,7 @@ export const TeamForm = ({ onSubmit, teams }: TeamFormProps) => {
     setIsSubmitting(true);
     const formRect = formRef.current?.getBoundingClientRect() || new DOMRect();
 
-    const team: Team = {
+    const team: TeamDetails = {
       id: generateUUID(),
       name: formData.name.trim(),
       selfDescription: formData.selfDescription.trim(),

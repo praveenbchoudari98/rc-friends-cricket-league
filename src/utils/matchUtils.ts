@@ -1,5 +1,7 @@
 import { format } from 'date-fns';
-import type { Match, Performance, Team } from '../types';
+import type { Match, Performance, Team, TeamDetails } from '../types';
+import { PLAYER_AVATARS } from '../components/Tournament/TeamCard';
+import { useTournamentContext } from '../context/TournamentContext';
 
 export const getVictoryMargin = (match: Match): string => {
     if (!match.result) {
@@ -76,3 +78,9 @@ export const getFormattedPerformance = (perf: Performance, type: string): string
         ? `${runs}/${wickets} (${overs})`
         : `${wickets}/${runs} (${overs})`;
 };
+
+export const getTeamLogo = (teamId: string): string => {
+    const teamDetails: TeamDetails[] = useTournamentContext().tournament.teamDetails || [];
+    const team = teamDetails.find((t: Team) => t.id === teamId);
+    return team ? team.logo : PLAYER_AVATARS[0]; // Fallback to default avatar if not found
+}

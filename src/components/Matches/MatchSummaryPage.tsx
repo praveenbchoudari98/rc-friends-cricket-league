@@ -16,7 +16,7 @@ import type { Match, Score, Team } from '../../types';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { getVictoryMargin } from '../../utils/matchUtils';
+import { getTeamLogo, getVictoryMargin } from '../../utils/matchUtils';
 
 interface MatchSummaryPageProps {
     match: Match;
@@ -324,7 +324,7 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                     }}>
                         <Box
                             component="img"
-                            src={team1.logo}
+                            src={getTeamLogo(team1.id)}
                             alt={team1.name}
                             sx={{
                                 width: 100,
@@ -381,7 +381,7 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                     }}>
                         <Box
                             component="img"
-                            src={team2.logo}
+                            src={getTeamLogo(team2.id)}
                             alt={team2.name}
                             sx={{
                                 width: 100,

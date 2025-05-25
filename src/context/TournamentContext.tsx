@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Tournament, Team, Match, MatchType } from '../types';
+import { Tournament, Team, Match, MatchType, TeamDetails } from '../types';
 import { generateLeagueSchedule } from '../utils/scheduleGenerator';
 import { generatePointsTable } from '../utils/pointsCalculator';
 import { compressImage } from '../utils/imageCompression';
 import { databaseService } from '../services/databaseService';
 import { generateUUID } from '../utils/uuid';
 import { getSortedMatchData } from '../utils/matchUtils';
+import { t } from 'framer-motion/dist/types.d-CtuPurYT';
 
 export interface TournamentContextType {
     tournament: Tournament;
@@ -34,7 +35,9 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
         pointsTable: [],
         config: {
             matchesPerTeamPair: 1
-        }
+        },
+        teamDetails: [],
+        matchesCompleted: 0
     }));
 
     const [error, setError] = useState<string | null>(null);
@@ -62,7 +65,9 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
                         pointsTable: [],
                         config: {
                             matchesPerTeamPair: 1
-                        }
+                        },
+                        teamDetails: [],
+                        matchesCompleted: 0
                     };
                     await databaseService.saveTournament(newTournament);
                     setTournament(newTournament);
@@ -90,21 +95,25 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
         }
     }, [tournament.teams, tournament.matches]);
 
-    const handleAddTeam = async (newTeam: { name: string; logo: string }) => {
+    const handleAddTeam = async (newTeam: { name: string; logo: string, selfDescription: string }) => {
         try {
             const compressedLogo = await compressImage(newTeam.logo);
-            const team: Team = {
+            const teamDetails: TeamDetails = {
                 ...newTeam,
                 id: generateUUID(),
                 logo: compressedLogo
             };
 
             // Add team to Firebase
-            await databaseService.addTeam(tournament.id, team);
+            await databaseService.addTeam(tournament.id, teamDetails);
 
             setTournament((prev: Tournament) => ({
                 ...prev,
-                teams: [...prev.teams, team]
+                teams: [...prev.teams, {
+                    id: teamDetails.id,
+                    name: teamDetails.name
+                }],
+                teamDetails: [...prev.teamDetails, teamDetails]
             }));
         } catch (error) {
             console.error('Failed to add team:', error);
@@ -119,7 +128,8 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
 
             setTournament((prev: Tournament) => ({
                 ...prev,
-                teams: prev.teams.filter((team: Team) => team.id !== teamId)
+                teams: prev.teams.filter((team: Team) => team.id !== teamId),
+                teamDetails: prev.teamDetails.filter((teamDetail: TeamDetails) => teamDetail.id !== teamId) 
             }));
         } catch (error) {
             console.error('Failed to remove team:', error);
@@ -240,7 +250,9 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
                 matches: [],
                 status: 'upcoming' as const,
                 currentStage: 'league' as const,
-                pointsTable: []
+                pointsTable: [],
+                teamDetails: [],
+                matchesCompleted: 0
             };
             await databaseService.updateTournament(newTournament);
             setTournament(newTournament);
@@ -257,7 +269,9 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
                 matches: [],
                 status: 'upcoming' as const,
                 currentStage: 'league' as const,
-                pointsTable: []
+                pointsTable: [],
+                matchesCompleted: 0,
+                
             };
             await databaseService.updateTournament(newTournament);
             setTournament(newTournament);

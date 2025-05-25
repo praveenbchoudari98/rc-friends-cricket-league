@@ -7,8 +7,12 @@ export type MatchOutcome = 'win' | 'loss' | 'tie';
 export interface Team {
     id: string;
     name: string;
+}
+export interface TeamDetails {
+    id: string;
+    name: string;
+    selfDescription: string;
     logo: string;
-    selfDescription?: string;
 }
 
 export interface Score {
@@ -85,6 +89,7 @@ export interface Tournament {
     id: string;
     name: string;
     teams: Team[];
+    teamDetails: TeamDetails[];
     matches: Match[];
     matchesCompleted: number;
     status: 'upcoming' | 'ongoing' | 'completed';
