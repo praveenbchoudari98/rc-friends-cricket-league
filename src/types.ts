@@ -83,6 +83,7 @@ export interface TeamStats {
     numofFivePlusWickets: number;
     bestBattingPerformance?: Performance;
     bestBowlingPerformance?: Performance;
+    teamDetails?: TeamDetails;
 }
 
 export interface Tournament {

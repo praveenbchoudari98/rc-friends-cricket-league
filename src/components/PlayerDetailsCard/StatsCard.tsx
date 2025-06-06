@@ -85,6 +85,7 @@ const PlayerSummaryStats = ({ playerStats }: DynamicStatsTableProps) => {
     const winRate = matches ? ((wins / matches) * 100).toFixed(1) : '0';
     const runRate = oversPlayed ? (runsScored / oversPlayed).toFixed(2) : '-';
     const economy = oversBowled ? (runsConceded / oversBowled).toFixed(2) : '-';
+    const avgRuns = matches ? (runsScored / matches).toFixed(2) : '-';
     const avgWickets = matches ? (wicketsTaken / matches).toFixed(2) : '-';
     const stats = [
         { label: "Matches", value: matches },
@@ -94,6 +95,7 @@ const PlayerSummaryStats = ({ playerStats }: DynamicStatsTableProps) => {
         { label: "Runs Scored", value: runsScored },
         { label: "Run Rate", value: runRate },
         { label: "Wickets Taken", value: wicketsTaken },
+        { label: "Avg Runs/Match", value: avgRuns },
         { label: "Avg Wickets/Match", value: avgWickets },
         { label: "Economy", value: economy },
         { label: "50+ Scores", value: numOfFiftyPlusScores },

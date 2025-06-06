@@ -69,7 +69,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
                         teamDetails: [],
                         matchesCompleted: 0
                     };
-                    await databaseService.saveTournament(newTournament);
+                    // await databaseService.saveTournament(newTournament);
                     setTournament(newTournament);
                 }
                 setIsInitialized(true);

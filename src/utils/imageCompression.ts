@@ -1,6 +1,6 @@
 export const compressImage = async (base64String: string): Promise<string> => {
     // If the image is already small enough, return it as is
-    if (base64String.length < 150000) { // Increased threshold to 150KB for better quality
+    if (base64String.length < 1000000) { // Increased threshold to 1MB
         return base64String;
     }
 

@@ -34,7 +34,7 @@ const PlayerDetailsCard = ({ selectedTeam, handleDialogClose }: PlayerDetailsCar
                 {selectedTeam.team.id && (
                   <Box
                     component="img"
-                    src={getTeamLogo(selectedTeam.team.id)}
+                    src={selectedTeam.teamDetails.logo}
                     alt={selectedTeam.team.name}
                     sx={{
                       width: "100%",
@@ -74,7 +74,7 @@ const PlayerDetailsCard = ({ selectedTeam, handleDialogClose }: PlayerDetailsCar
                   color="text.secondary"
                   sx={{ fontStyle: "italic", mt: 1 }}
                 >
-                  {selectedTeam.team.selfDescription ||
+                  {selectedTeam.teamDetails.selfDescription ||
                     "Young and energetic aggressive batsman✨"}
                 </Typography>
               </Box>

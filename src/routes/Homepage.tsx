@@ -201,7 +201,7 @@ const HomePage: React.FC = () => {
           name: recentMatch?.team2?.name,
           runs: recentMatch?.result?.team2Score.runs,
           wickets: recentMatch?.result?.team2Score.wickets,
-          overs: recentMatch?.result?.team2Score.overs, 
+          overs: recentMatch?.result?.team2Score.overs,
           id: recentMatch?.team2?.id,
         },
         matchType: recentMatch?.matchType,
@@ -225,8 +225,13 @@ const HomePage: React.FC = () => {
     const selectedTeam = tournament.pointsTable.find(
       (t: TeamStats) => t.team.name === team.name
     );
+    const teamDetails = tournament.teamDetails.find(team => team.id === selectedTeam.team.id);
+    const selectedTeamDetails = {
+      ...selectedTeam,
+      teamDetails: teamDetails || null,
+    }
     if (!selectedTeam) return;
-    setSelectedTeam(selectedTeam);
+    setSelectedTeam(selectedTeamDetails);
     setIsLoading(true);
     setDialogOpen(true);
     setTimeout(() => setIsLoading(false), 1200);
