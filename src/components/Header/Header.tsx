@@ -176,7 +176,7 @@ export function Header() {
                                 }
                             }}
                         >
-                            Cricket League
+                            Cricket League PC
                         </Typography>
                     </Box>
                 </Box>
@@ -227,9 +227,11 @@ export function Header() {
                             fontWeight: 600,
                             fontSize: '0.75rem',
                             px: 1,
+                            height: 24,
                             '&:hover': {
                                 backgroundColor: 'rgba(255, 140, 0, 0.25)'
-                            }
+                            },
+                            flexShrink: 0
                         }}
                     />
                 )}
@@ -265,7 +267,7 @@ export function Header() {
                     }}
                 >
                     <List sx={{ pt: 2 }}>
-                        <ListItem sx={{ pb: 2 }}>
+                        <ListItem sx={{ pb: 2, justifyContent: 'center' }}>
                             <Chip
                                 label={APP_VERSION}
                                 size="small"
@@ -274,7 +276,8 @@ export function Header() {
                                     color: '#FF8C00',
                                     border: '1px solid rgba(255, 140, 0, 0.3)',
                                     fontWeight: 600,
-                                    fontSize: '0.75rem'
+                                    fontSize: '0.75rem',
+                                    height: 24
                                 }}
                             />
                         </ListItem>
