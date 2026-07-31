@@ -18,7 +18,7 @@ import Slider from "react-slick";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@react-hook/window-size";
-import kit from "../assets/images/Kit.webp";
+import kit from "../assets/images/kit.webp";
 import Ball from "../assets/images/ball.jpg";
 import Bat from "../assets/images/bat.webp";
 import MIRC24 from "../assets/images/MIRC24.webp";
