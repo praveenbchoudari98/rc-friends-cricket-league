@@ -14,7 +14,8 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test:e2e": "playwright test",
-    "test:unit": "jest --watch"
+    "test:unit": "jest --watch",
+    "deploy": "npm run build && surge dist"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

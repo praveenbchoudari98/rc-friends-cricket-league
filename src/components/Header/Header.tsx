@@ -176,7 +176,7 @@ export function Header() {
                                 }
                             }}
                         >
-                            Cricket League PC
+                            Cricket League
                         </Typography>
                     </Box>
                 </Box>
