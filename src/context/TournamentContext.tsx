@@ -11,7 +11,7 @@ import { t } from 'framer-motion/dist/types.d-CtuPurYT';
 
 export interface TournamentContextType {
     tournament: Tournament;
-    handleAddTeam: (newTeam: { name: string; logo: string }) => Promise<void>;
+    handleAddTeam: (newTeam: { name: string; logo: string; selfDescription: string }) => Promise<void>;
     handleRemoveTeam: (teamId: string) => void;
     handleStartTournament: (config: { matchesPerTeamPair: number }) => void;
     handleCreatePlayoffMatch: (team1: Team, team2: Team, matchType: MatchType) => void;
@@ -69,7 +69,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
                         teamDetails: [],
                         matchesCompleted: 0
                     };
-                    // await databaseService.saveTournament(newTournament);
+                    await databaseService.saveTournament(newTournament);
                     setTournament(newTournament);
                 }
                 setIsInitialized(true);
