@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-    AppBar, 
-    Toolbar, 
-    Typography, 
-    Box, 
-    Tabs, 
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Box,
+    Tabs,
     Tab,
     IconButton,
     Drawer,
@@ -12,11 +12,16 @@ import {
     ListItem,
     ListItemText,
     useTheme,
-    useMediaQuery
+    useMediaQuery,
+    Chip
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../assets/logo.png';
+
+// Update this version number when deploying changes
+// Also update package.json version to match
+const APP_VERSION = 'v1.0.0';
 
 const routes = [
     {path:"/",label:"Home"},
@@ -211,6 +216,24 @@ export function Header() {
                     </Box>
                 )}
 
+                {!isMobile && (
+                    <Chip
+                        label={APP_VERSION}
+                        size="small"
+                        sx={{
+                            backgroundColor: 'rgba(255, 140, 0, 0.15)',
+                            color: '#FF8C00',
+                            border: '1px solid rgba(255, 140, 0, 0.3)',
+                            fontWeight: 600,
+                            fontSize: '0.75rem',
+                            px: 1,
+                            '&:hover': {
+                                backgroundColor: 'rgba(255, 140, 0, 0.25)'
+                            }
+                        }}
+                    />
+                )}
+
                 {isMobile && (
                     <IconButton
                         edge="end"
@@ -242,6 +265,19 @@ export function Header() {
                     }}
                 >
                     <List sx={{ pt: 2 }}>
+                        <ListItem sx={{ pb: 2 }}>
+                            <Chip
+                                label={APP_VERSION}
+                                size="small"
+                                sx={{
+                                    backgroundColor: 'rgba(255, 140, 0, 0.15)',
+                                    color: '#FF8C00',
+                                    border: '1px solid rgba(255, 140, 0, 0.3)',
+                                    fontWeight: 600,
+                                    fontSize: '0.75rem'
+                                }}
+                            />
+                        </ListItem>
                         {routes.map((route) => (
                             <ListItem
                                 key={route.path}
