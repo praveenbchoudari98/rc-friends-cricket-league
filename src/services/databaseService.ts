@@ -11,6 +11,22 @@ getDocs(collection(db, 'tournaments'))
 // Keep Team references minimal so logos/selfDescription don't leak into matches/points table.
 const toTeamRef = (team: Team): Team => ({ id: team.id, name: team.name });
 
+// Remove undefined values recursively (Firestore doesn't accept undefined)
+const removeUndefinedValues = (obj: any): any => {
+    if (obj === null || obj === undefined) return undefined;
+    if (Array.isArray(obj)) return obj.map(removeUndefinedValues).filter(v => v !== undefined);
+    if (typeof obj !== 'object') return obj;
+    
+    const cleaned: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+        const cleanedValue = removeUndefinedValues(value);
+        if (cleanedValue !== undefined) {
+            cleaned[key] = cleanedValue;
+        }
+    }
+    return cleaned;
+};
+
 const sanitizeMatch = (match: Match): Match => ({
     ...match,
     team1: toTeamRef(match.team1),
@@ -26,18 +42,23 @@ const sanitizeMatch = (match: Match): Match => ({
     } : undefined
 });
 
-const sanitizeTeamStats = (stat: TeamStats): TeamStats => ({
-    ...stat,
-    team: toTeamRef(stat.team),
-    teamDetails: undefined
-});
+const sanitizeTeamStats = (stat: TeamStats): Omit<TeamStats, 'teamDetails'> => {
+    const { teamDetails, ...rest } = stat;
+    return {
+        ...rest,
+        team: toTeamRef(stat.team)
+    };
+};
 
-const sanitizeTournament = (tournament: Tournament): Tournament => ({
-    ...tournament,
-    teams: tournament.teams.map(toTeamRef),
-    matches: tournament.matches.map(sanitizeMatch),
-    pointsTable: tournament.pointsTable.map(sanitizeTeamStats)
-});
+const sanitizeTournament = (tournament: Tournament): any => {
+    const sanitized = {
+        ...tournament,
+        teams: tournament.teams.map(toTeamRef),
+        matches: tournament.matches.map(sanitizeMatch),
+        pointsTable: tournament.pointsTable.map(sanitizeTeamStats)
+    };
+    return removeUndefinedValues(sanitized);
+};
 
 export const databaseService = {
     async saveTournament(tournament: Tournament): Promise<void> {
