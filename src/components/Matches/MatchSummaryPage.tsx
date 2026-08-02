@@ -207,7 +207,8 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                 result = 'tie';
                 winner = null;
             } else {
-                winner = team1Score.runs > team2Score.runs ? match.team1 : match.team2;
+                const winningTeam = team1Score.runs > team2Score.runs ? match.team1 : match.team2;
+                winner = { id: winningTeam.id, name: winningTeam.name };
             }
 
             // Preserve the existing toss and innings information
@@ -223,7 +224,7 @@ export const MatchSummaryPage = ({ match, onUpdateScores }: MatchSummaryPageProp
                     team1Score,
                     team2Score,
                     result,
-                    winner: winner || match.team1 // Fallback to team1 to satisfy type requirement
+                    winner: winner || { id: match.team1.id, name: match.team1.name } // Fallback to team1 to satisfy type requirement
                 }
             };
 

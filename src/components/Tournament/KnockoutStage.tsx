@@ -112,14 +112,15 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
     // Create placeholder matches if they don't exist
     const placeholderTeam: Team = {
         id: 'tbd',
-        name: 'TBD',
-        logo: tbdAvatarUrl
+        name: 'TBD'
     };
+
+    const toTeamRef = (team: Team): Team => ({ id: team.id, name: team.name });
 
     // Get teams based on points table positions
     const getTeamByPosition = (position: number): Team => {
         if (allLeagueMatchesCompleted && pointsTable && pointsTable.length > position) {
-            return pointsTable[position].team;
+            return toTeamRef(pointsTable[position].team);
         }
         return placeholderTeam;
     };
@@ -127,8 +128,8 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
     // Get playoff matches
     const qualifierMatch = matches.find((m: Match) => m.matchType === ('qualifier' as MatchType)) || {
         id: 'placeholder-qualifier',
-        team1: allLeagueMatchesCompleted ? pointsTable[1]?.team : placeholderTeam,
-        team2: allLeagueMatchesCompleted ? pointsTable[2]?.team : placeholderTeam,
+        team1: allLeagueMatchesCompleted && pointsTable[1] ? toTeamRef(pointsTable[1].team) : placeholderTeam,
+        team2: allLeagueMatchesCompleted && pointsTable[2] ? toTeamRef(pointsTable[2].team) : placeholderTeam,
         matchType: 'qualifier' as MatchType,
         status: 'scheduled' as MatchStatus,
         venue: 'TBD'
@@ -136,7 +137,7 @@ export const KnockoutStage: React.FC<KnockoutStageProps> = ({
 
     const finalMatch = matches.find((m: Match) => m.matchType === 'final') || {
         id: 'placeholder-final',
-        team1: allLeagueMatchesCompleted ? pointsTable[0]?.team : placeholderTeam,
+        team1: allLeagueMatchesCompleted && pointsTable[0] ? toTeamRef(pointsTable[0].team) : placeholderTeam,
         team2: placeholderTeam, // Will be qualifier winner
         matchType: 'final',
         status: 'scheduled',

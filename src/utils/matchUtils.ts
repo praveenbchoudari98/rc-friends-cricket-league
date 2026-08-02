@@ -1,7 +1,8 @@
+import { useContext } from 'react';
 import { format } from 'date-fns';
-import type { Match, Performance, Team, TeamDetails } from '../types';
+import type { Match, Performance, TeamDetails } from '../types';
 import { PLAYER_AVATARS } from '../components/Tournament/TeamCard';
-import { useTournamentContext } from '../context/TournamentContext';
+import { TournamentContext } from '../context/TournamentContext';
 
 export const getVictoryMargin = (match: Match): string => {
     if (!match.result) {
@@ -79,8 +80,12 @@ export const getFormattedPerformance = (perf: Performance, type: string): string
         : `${wickets}/${runs} (${overs})`;
 };
 
+// This helper is only called from React components, so the useContext hook is safe there.
+/* eslint-disable react-hooks/rules-of-hooks */
 export const getTeamLogo = (teamId: string): string => {
-    const teamDetails: TeamDetails[] = useTournamentContext().tournament.teamDetails || [];
-    const team = teamDetails.find((t: Team) => t.id === teamId);
+    const context = useContext(TournamentContext);
+    const teamDetails: TeamDetails[] = context?.tournament.teamDetails || [];
+    const team = teamDetails.find((t: TeamDetails) => t.id === teamId);
     return team ? team.logo : PLAYER_AVATARS[0]; // Fallback to default avatar if not found
-}
+};
+/* eslint-enable react-hooks/rules-of-hooks */

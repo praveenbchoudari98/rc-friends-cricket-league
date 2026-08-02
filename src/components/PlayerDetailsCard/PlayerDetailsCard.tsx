@@ -6,6 +6,8 @@ import { TeamStats } from "../../types";
 import PlayerSummaryStats from "./StatsCard";
 import './FlipStyles.css'; // 👈 Include the CSS file
 import { getTeamLogo } from "../../utils/matchUtils";
+import { useTournamentContext } from "../../context/TournamentContext";
+import { PLAYER_AVATARS } from "../../components/Tournament/TeamCard";
 
 interface PlayerDetailsCardProps {
   selectedTeam: TeamStats;
@@ -14,6 +16,13 @@ interface PlayerDetailsCardProps {
 
 const PlayerDetailsCard = ({ selectedTeam, handleDialogClose }: PlayerDetailsCardProps) => {
   const [statsTabOpen, setStatsTabOpen] = useState(false);
+  const { tournament } = useTournamentContext();
+
+  const teamLogo = getTeamLogo(selectedTeam?.team?.id || '');
+
+  const teamDetails = selectedTeam.team
+    ? tournament.teamDetails.find((team) => team.id === selectedTeam.team.id)
+    : undefined;
 
   return (
     <Dialog
@@ -34,7 +43,7 @@ const PlayerDetailsCard = ({ selectedTeam, handleDialogClose }: PlayerDetailsCar
                 {selectedTeam.team.id && (
                   <Box
                     component="img"
-                    src={selectedTeam.teamDetails.logo}
+                    src={teamLogo}
                     alt={selectedTeam.team.name}
                     sx={{
                       width: "100%",
@@ -74,7 +83,7 @@ const PlayerDetailsCard = ({ selectedTeam, handleDialogClose }: PlayerDetailsCar
                   color="text.secondary"
                   sx={{ fontStyle: "italic", mt: 1 }}
                 >
-                  {selectedTeam.teamDetails.selfDescription ||
+                  {teamDetails?.selfDescription ||
                     "Young and energetic aggressive batsman✨"}
                 </Typography>
               </Box>

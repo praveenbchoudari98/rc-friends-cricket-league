@@ -1,5 +1,5 @@
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where } from 'firebase/firestore';
-import { Tournament, Match, Team } from '../types';
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc } from 'firebase/firestore';
+import { Tournament, Match, Team, TeamDetails, TeamStats } from '../types';
 import { db } from '../config/firebase';
 
 // Enhanced debugging to verify Firestore connection
@@ -8,12 +8,43 @@ getDocs(collection(db, 'tournaments'))
     .then(() => console.log('✅ Firestore connection verified'))
     .catch(error => console.error('❌ Firestore connection failed:', error));
 
+// Keep Team references minimal so logos/selfDescription don't leak into matches/points table.
+const toTeamRef = (team: Team): Team => ({ id: team.id, name: team.name });
+
+const sanitizeMatch = (match: Match): Match => ({
+    ...match,
+    team1: toTeamRef(match.team1),
+    team2: toTeamRef(match.team2),
+    result: match.result ? {
+        ...match.result,
+        winner: match.result.winner ? toTeamRef(match.result.winner) : undefined
+    } : undefined,
+    inningsInfo: match.inningsInfo ? {
+        ...match.inningsInfo,
+        tossWinner: toTeamRef(match.inningsInfo.tossWinner),
+        battingFirst: toTeamRef(match.inningsInfo.battingFirst)
+    } : undefined
+});
+
+const sanitizeTeamStats = (stat: TeamStats): TeamStats => ({
+    ...stat,
+    team: toTeamRef(stat.team),
+    teamDetails: undefined
+});
+
+const sanitizeTournament = (tournament: Tournament): Tournament => ({
+    ...tournament,
+    teams: tournament.teams.map(toTeamRef),
+    matches: tournament.matches.map(sanitizeMatch),
+    pointsTable: tournament.pointsTable.map(sanitizeTeamStats)
+});
+
 export const databaseService = {
     async saveTournament(tournament: Tournament): Promise<void> {
         console.log('Attempting to save tournament:', tournament.id);
         try {
             const tournamentRef = doc(db, 'tournaments', tournament.id);
-            await setDoc(tournamentRef, { ...tournament });
+            await setDoc(tournamentRef, { ...sanitizeTournament(tournament) });
             console.log('Tournament saved successfully:', tournament.id);
         } catch (error) {
             console.error('Error saving tournament:', error);
@@ -31,7 +62,7 @@ export const databaseService = {
                 id: doc.id
             })) as Tournament[];
             console.log('Fetched tournaments:', tournaments.length);
-            return tournaments;
+            return tournaments.map(sanitizeTournament);
         } catch (error) {
             console.error('Error getting all tournaments:', error);
             throw error;
@@ -45,10 +76,10 @@ export const databaseService = {
             if (!tournamentSnap.exists()) {
                 return null;
             }
-            return {
+            return sanitizeTournament({
                 ...tournamentSnap.data(),
                 id: tournamentSnap.id
-            } as Tournament;
+            } as Tournament);
         } catch (error) {
             console.error('Error getting tournament:', error);
             throw error;
@@ -58,7 +89,7 @@ export const databaseService = {
     async updateTournament(tournament: Tournament): Promise<void> {
         try {
             const tournamentRef = doc(db, 'tournaments', tournament.id);
-            await updateDoc(tournamentRef, { ...tournament });
+            await updateDoc(tournamentRef, { ...sanitizeTournament(tournament) });
         } catch (error) {
             console.error('Error updating tournament:', error);
             throw error;
@@ -90,21 +121,22 @@ export const databaseService = {
             } as Tournament;
 
             const matchIndex = tournament.matches.findIndex(m => m.id === match.id);
+            const sanitizedMatch = sanitizeMatch(match);
 
             if (matchIndex === -1) {
-                tournament.matches.push(match);
+                tournament.matches.push(sanitizedMatch);
             } else {
-                tournament.matches[matchIndex] = match;
+                tournament.matches[matchIndex] = sanitizedMatch;
             }
 
-            await updateDoc(tournamentRef, { matches: tournament.matches });
+            await updateDoc(tournamentRef, { matches: tournament.matches.map(sanitizeMatch) });
         } catch (error) {
             console.error('Error updating match:', error);
             throw error;
         }
     },
 
-    async addTeam(tournamentId: string, team: Team): Promise<void> {
+    async addTeam(tournamentId: string, teamDetails: TeamDetails): Promise<void> {
         try {
             const tournamentRef = doc(db, 'tournaments', tournamentId);
             const tournamentSnap = await getDoc(tournamentRef);
@@ -118,8 +150,15 @@ export const databaseService = {
                 id: tournamentSnap.id
             } as Tournament;
 
-            tournament.teams.push(team);
-            await updateDoc(tournamentRef, { teams: tournament.teams });
+            const teamRef: Team = { id: teamDetails.id, name: teamDetails.name };
+
+            tournament.teams.push(teamRef);
+            tournament.teamDetails.push(teamDetails);
+
+            await updateDoc(tournamentRef, {
+                teams: tournament.teams.map(toTeamRef),
+                teamDetails: tournament.teamDetails
+            });
         } catch (error) {
             console.error('Error adding team:', error);
             throw error;
@@ -141,10 +180,15 @@ export const databaseService = {
             } as Tournament;
 
             tournament.teams = tournament.teams.filter(team => team.id !== teamId);
-            await updateDoc(tournamentRef, { teams: tournament.teams });
+            tournament.teamDetails = tournament.teamDetails.filter(team => team.id !== teamId);
+
+            await updateDoc(tournamentRef, {
+                teams: tournament.teams.map(toTeamRef),
+                teamDetails: tournament.teamDetails
+            });
         } catch (error) {
             console.error('Error removing team:', error);
             throw error;
         }
     }
-}; 
+};

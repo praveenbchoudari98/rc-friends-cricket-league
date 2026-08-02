@@ -1,9 +1,11 @@
 import type { Team, Match } from '../types';
 import { generateUUID } from './uuid';
 
+const toTeamRef = (team: Team): Team => ({ id: team.id, name: team.name });
+
 export const generateLeagueSchedule = (teams: Team[], matchesPerTeamPair: number = 1): Match[] => {
     const matches: Match[] = [];
-    
+
     // Generate matches between each pair of teams
     for (let i = 0; i < teams.length; i++) {
         for (let j = i + 1; j < teams.length; j++) {
@@ -15,26 +17,13 @@ export const generateLeagueSchedule = (teams: Team[], matchesPerTeamPair: number
 
                 matches.push({
                     id: generateUUID(),
-                    team1: isHome ? teams[i] : teams[j],
-                    team2: isHome ? teams[j] : teams[i],
+                    team1: isHome ? toTeamRef(teams[i]) : toTeamRef(teams[j]),
+                    team2: isHome ? toTeamRef(teams[j]) : toTeamRef(teams[i]),
                     matchType: 'league',
                     status: 'scheduled',
                     venue: 'Wankhede Stadium, Mumbai',
                     date: new Date() // Add default date
                 });
-
-                // For odd numbers of matches per pair, add reverse fixture
-                if (k === matchesPerTeamPair - 1 && matchesPerTeamPair % 2 !== 0) {
-                    matches.push({
-                        id: generateUUID(),
-                        team1: !isHome ? teams[i] : teams[j],
-                        team2: !isHome ? teams[j] : teams[i],
-                        matchType: 'league',
-                        status: 'scheduled',
-                        venue: 'Wankhede Stadium, Mumbai',
-                        date: new Date() // Add default date
-                    });
-                }
             }
         }
     }
@@ -64,8 +53,8 @@ export const generateKnockoutMatches = (
 ): Match => {
     return {
         id: generateUUID(),
-        team1,
-        team2,
+        team1: toTeamRef(team1),
+        team2: toTeamRef(team2),
         matchType,
         status: 'scheduled',
         venue: 'Wankhede Stadium, Mumbai',

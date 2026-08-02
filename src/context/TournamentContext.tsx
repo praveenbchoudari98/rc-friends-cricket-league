@@ -143,7 +143,10 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
             return;
         }
 
-        const matches = generateLeagueSchedule(tournament.teams, config.matchesPerTeamPair);
+        const matches = generateLeagueSchedule(
+            tournament.teams.map(team => ({ id: team.id, name: team.name })),
+            config.matchesPerTeamPair
+        );
         const updatedTournament = {
             ...tournament,
             matches,
@@ -167,8 +170,8 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
     const handleCreatePlayoffMatch = async (team1: Team, team2: Team, matchType: MatchType) => {
         const newMatch: Match = {
             id: generateUUID(),
-            team1,
-            team2,
+            team1: { id: team1.id, name: team1.name },
+            team2: { id: team2.id, name: team2.name },
             matchType,
             status: 'scheduled',
             date: new Date(),

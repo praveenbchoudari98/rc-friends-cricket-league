@@ -225,13 +225,8 @@ const HomePage: React.FC = () => {
     const selectedTeam = tournament.pointsTable.find(
       (t: TeamStats) => t.team.name === team.name
     );
-    const teamDetails = tournament.teamDetails.find(team => team.id === selectedTeam.team.id);
-    const selectedTeamDetails = {
-      ...selectedTeam,
-      teamDetails: teamDetails || null,
-    }
     if (!selectedTeam) return;
-    setSelectedTeam(selectedTeamDetails);
+    setSelectedTeam(selectedTeam);
     setIsLoading(true);
     setDialogOpen(true);
     setTimeout(() => setIsLoading(false), 1200);

@@ -194,11 +194,13 @@ export const MatchCard = ({
                 result = 'tie';
                 winner = undefined;
             } else {
-                winner = team1Score.runs > team2Score.runs ? match.team1 : match.team2;
+                const winningTeam = team1Score.runs > team2Score.runs ? match.team1 : match.team2;
+                winner = { id: winningTeam.id, name: winningTeam.name };
             }
 
             // Determine batting first team based on toss winner and decision
-            const battingFirst = tossDecision === 'bat' ? tossWinner! : (tossWinner === match.team1 ? match.team2 : match.team1);
+            const battingFirstTeam = tossDecision === 'bat' ? tossWinner! : (tossWinner === match.team1 ? match.team2 : match.team1);
+            const battingFirst: Team = { id: battingFirstTeam.id, name: battingFirstTeam.name };
 
             const updatedMatch: Match = {
                 ...match,
@@ -206,11 +208,11 @@ export const MatchCard = ({
                 status: 'completed',
                 date: new Date(`${matchDate} ${matchTime}`),
                 inningsInfo: {
-                    tossWinner: tossWinner!,
+                    tossWinner: { id: tossWinner!.id, name: tossWinner!.name },
                     tossDecision: tossDecision as TossDecision,
                     battingFirst,
-                    date: matchDate || new Date(), // Preserve original match date if it exists
-                    time: matchTime // Use the selected match time
+                    date: new Date(`${matchDate} ${matchTime}`),
+                    time: matchTime
 
                 },
                 result: {
@@ -379,8 +381,11 @@ export const MatchCard = ({
                 winner = undefined;
             } else {
                 result = 'win';
-                winner = team1Score.runs > team2Score.runs ? match.team1 : match.team2;
+                const winningTeam = team1Score.runs > team2Score.runs ? match.team1 : match.team2;
+                winner = { id: winningTeam.id, name: winningTeam.name };
             }
+
+            const battingFirst = matchData.team1!;
 
             const updatedMatch: Match = {
                 ...match,
@@ -392,10 +397,10 @@ export const MatchCard = ({
                     winner
                 },
                 inningsInfo: {
-                    battingFirst: matchData.team1!,
+                    battingFirst: { id: battingFirst.id, name: battingFirst.name },
                     date: new Date(),
                     time: new Date().toLocaleTimeString(),
-                    tossWinner: matchData.team1!,
+                    tossWinner: { id: battingFirst.id, name: battingFirst.name },
                     tossDecision: 'bat'
                 }
             };

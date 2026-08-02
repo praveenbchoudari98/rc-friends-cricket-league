@@ -3,9 +3,9 @@ import type { Team } from '../types';
 
 describe('generateLeagueSchedule', () => {
     const teams: Team[] = [
-        { id: 'team1', name: 'Team A', logo: 'logoA' },
-        { id: 'team2', name: 'Team B', logo: 'logoB' },
-        { id: 'team3', name: 'Team C', logo: 'logoC' }
+        { id: 'team1', name: 'Team A' },
+        { id: 'team2', name: 'Team B' },
+        { id: 'team3', name: 'Team C' }
     ];
 
     test('generates correct number of matches for single match per pair', () => {

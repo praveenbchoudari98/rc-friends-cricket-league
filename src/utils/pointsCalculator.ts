@@ -10,12 +10,13 @@ const getFirstName = (fullName: string) => fullName.split(" ")[0];
 
 export function generatePointsTable(teams: Team[], matches: Match[]): TeamStats[] {
     const stats = new Map<string, TeamStats>();
+    const toTeamRef = (team: Team): Team => ({ id: team.id, name: team.name });
     const sortedmatches = getSortedMatchData(matches)
 
     // Initialize stats for all teams
     teams.forEach(team => {
         stats.set(team.id, {
-            team,
+            team: toTeamRef(team),
             matches: 0,
             wins: 0,
             losses: 0,

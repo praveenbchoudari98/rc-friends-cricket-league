@@ -45,14 +45,12 @@ jest.mock('@mui/material', () => ({
 describe('Super Duper Over Match Creation', () => {
     const mockTeam1: Team = {
         id: 'team1',
-        name: 'Team A',
-        logo: 'https://example.com/logo-a.png'
+        name: 'Team A'
     };
 
     const mockTeam2: Team = {
         id: 'team2',
-        name: 'Team B',
-        logo: 'https://example.com/logo-b.png'
+        name: 'Team B'
     };
 
     const createTiedMatch = (matchType: 'qualifier' | 'final'): Match => ({
