@@ -34,9 +34,9 @@ export const TournamentStartModal = ({ open, onClose, onStart }: TournamentStart
             return;
         }
 
-        if (numValue < 1 || numValue > 5) {
+        if (numValue < 1 || numValue > 25) {
             setMatches(value);
-            setError('Value must be between 1 and 5');
+            setError('Value must be between 1 and 25');
         } else {
             setMatches(value);
             setError('');
@@ -48,15 +48,15 @@ export const TournamentStartModal = ({ open, onClose, onStart }: TournamentStart
         if (matches === '' || isNaN(numValue) || numValue < 1) {
             setMatches('1');
             setError('');
-        } else if (numValue > 5) {
-            setMatches('5');
+        } else if (numValue > 25) {
+            setMatches('25');
             setError('');
         }
     };
 
     const handleStart = () => {
         const numValue = parseInt(matches);
-        if (numValue >= 1 && numValue <= 5) {
+        if (numValue >= 1 && numValue <= 25) {
             onStart({ matchesPerTeamPair: numValue });
             onClose();
         }
@@ -95,11 +95,11 @@ export const TournamentStartModal = ({ open, onClose, onStart }: TournamentStart
                         onChange={handleMatchesChange}
                         onBlur={handleBlur}
                         error={!!error}
-                        helperText={error || "Each team will play this many times against every other team (1-5 matches)"}
+                        helperText={error || "Each team will play this many times against every other team (1-25 matches)"}
                         InputProps={{
                             inputProps: {
                                 min: 1,
-                                max: 5,
+                                max: 25,
                                 step: 1
                             }
                         }}

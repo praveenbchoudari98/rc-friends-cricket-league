@@ -347,6 +347,11 @@ export const MatchCard = ({
         setMatchDate(format(new Date(), 'yyyy-MM-dd'));
         setMatchTime(format(new Date(), 'HH:mm'));
         setVenue('Wankhede Stadium, Mumbai');
+        // Set default overs to 5
+        setScores((prev: ScoresState) => ({
+            team1: { ...prev.team1, overs: 5 },
+            team2: { ...prev.team2, overs: 5 }
+        }));
         setIsDialogOpen(true);
     };
 
