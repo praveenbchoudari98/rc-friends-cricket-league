@@ -110,7 +110,8 @@ export const databaseService = {
     async updateTournament(tournament: Tournament): Promise<void> {
         try {
             const tournamentRef = doc(db, 'tournaments', tournament.id);
-            await updateDoc(tournamentRef, { ...sanitizeTournament(tournament) });
+            const sanitized = sanitizeTournament(tournament);
+            await updateDoc(tournamentRef, sanitized);
         } catch (error) {
             console.error('Error updating tournament:', error);
             throw error;
@@ -150,7 +151,7 @@ export const databaseService = {
                 tournament.matches[matchIndex] = sanitizedMatch;
             }
 
-            await updateDoc(tournamentRef, { matches: tournament.matches.map(sanitizeMatch) });
+            await updateDoc(tournamentRef, { matches: removeUndefinedValues(tournament.matches.map(sanitizeMatch)) });
         } catch (error) {
             console.error('Error updating match:', error);
             throw error;
@@ -176,10 +177,10 @@ export const databaseService = {
             tournament.teams.push(teamRef);
             tournament.teamDetails.push(teamDetails);
 
-            await updateDoc(tournamentRef, {
+            await updateDoc(tournamentRef, removeUndefinedValues({
                 teams: tournament.teams.map(toTeamRef),
                 teamDetails: tournament.teamDetails
-            });
+            }));
         } catch (error) {
             console.error('Error adding team:', error);
             throw error;
@@ -203,10 +204,10 @@ export const databaseService = {
             tournament.teams = tournament.teams.filter(team => team.id !== teamId);
             tournament.teamDetails = tournament.teamDetails.filter(team => team.id !== teamId);
 
-            await updateDoc(tournamentRef, {
+            await updateDoc(tournamentRef, removeUndefinedValues({
                 teams: tournament.teams.map(toTeamRef),
                 teamDetails: tournament.teamDetails
-            });
+            }));
         } catch (error) {
             console.error('Error removing team:', error);
             throw error;

@@ -580,7 +580,17 @@ const HomePage: React.FC = () => {
             🏏 Registered Teams
           </Typography>
           <Grid container spacing={3}>
-            {tournament.teams.map((team, idx) => (
+            {tournament.teams
+              .map(team => ({
+                team,
+                createdAt: tournament.teamDetails.find(td => td.id === team.id)?.createdAt || 0
+              }))
+              .sort((a, b) => {
+                const timeA = typeof a.createdAt === 'number' ? a.createdAt : (a.createdAt?.getTime() || 0);
+                const timeB = typeof b.createdAt === 'number' ? b.createdAt : (b.createdAt?.getTime() || 0);
+                return timeA - timeB;
+              })
+              .map(({ team }, idx) => (
               <Grid item xs={12} sm={6} md={4} key={idx}>
                 <Card
                   sx={{ cursor: "pointer", p: 2, borderRadius: 3 }}

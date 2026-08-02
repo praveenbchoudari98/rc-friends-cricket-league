@@ -101,7 +101,8 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
             const teamDetails: TeamDetails = {
                 ...newTeam,
                 id: generateUUID(),
-                logo: compressedLogo
+                logo: compressedLogo,
+                createdAt: Date.now()
             };
 
             // Add team to Firebase

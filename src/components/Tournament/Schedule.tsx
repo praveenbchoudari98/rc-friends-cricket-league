@@ -64,7 +64,10 @@ export const Schedule = ({
     }, []);
 
 
-    const leagueMatches = matches.filter(match => match.matchType === 'league');
+    const leagueMatches = getSortedMatchData(
+        matches.filter(match => match.matchType === 'league'),
+        false // descending order: most recent first
+    );
     // const playoffMatches = matches.filter(match => match.matchType !== 'league');
 
     return (

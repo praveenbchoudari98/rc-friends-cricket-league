@@ -64,9 +64,11 @@ const toMillis = (date: any): number => {
     }
     return new Date(date).getTime(); // fallback, in case it's a string
 };
-export const getSortedMatchData = (matches: Match[]): Match[] => {
+export const getSortedMatchData = (matches: Match[], ascending: boolean = true): Match[] => {
     return matches.sort((a, b) => {
-        return toMillis(b.date) - toMillis(a.date); // Most recent first
+        const timeA = toMillis(a.date);
+        const timeB = toMillis(b.date);
+        return ascending ? timeA - timeB : timeB - timeA; // ascending: earliest first, descending: most recent first
     });
 }
 

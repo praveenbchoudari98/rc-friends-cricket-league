@@ -13,6 +13,7 @@ export interface TeamDetails {
     name: string;
     selfDescription: string;
     logo: string;
+    createdAt?: Date | number; // Timestamp for sorting
 }
 
 export interface Score {
